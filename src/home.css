@@ -1,0 +1,143 @@
+/* Style global pour le body */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Style pour l'en-tête */
+header {
+    background-color: #3498db;
+    color: #ffffff;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Style pour le contenu principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Style pour les titres */
+h1 {
+    font-size: 33px;
+    margin-bottom: 10px;
+}
+
+/* Style pour les paragraphes */
+p {
+    margin: 10px 0;
+}
+
+/* Style pour les informations d'aide */
+.help {
+    cursor: pointer;
+    position: relative;
+}
+
+.help-content {
+    display: none;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 10px;
+    width: 350px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+
+.help:hover .help-content {
+    display: block;
+    color: black;
+}
+
+/* Style pour la zone des boutons */
+.areaButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+/* Style pour les boutons */
+.areaButtons button {
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.areaButtons button:hover {
+    background-color: #2980b9;
+}
+
+
+/* Style pour la cartouche mise en deux colonnes */
+.cartouche {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style pour les groupes logiques */
+.form-group {
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+    gap: 20px;
+}
+
+/* Style pour les labels dans les groupes */
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Style pour les champs de saisie dans les groupes */
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group select,
+.form-group input[type="number"] {
+    width: 80%;
+    max-width: 200px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Style pour le bouton de soumission */
+.btn-newJournal {
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+
+    /* Ajout de ces propriétés */
+    margin-left: auto;
+    display: block;
+    font-size: 16px;
+}
+
+.btn-newJournal:hover {
+    background-color: #2980b9;
+}

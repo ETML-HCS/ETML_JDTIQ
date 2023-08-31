@@ -17,8 +17,6 @@ Suivre les activités professionnelles et académiques à l'ETML.
 - JavaScript
 - LocalStorage/IndexedDB
 
----
-
 ## Fonctionnalités de Base
 
 ### 1. Ajout d'Entrées
@@ -40,9 +38,7 @@ Suivre les activités professionnelles et académiques à l'ETML.
 ### 4. Exportation des Données
 
 - PDF ou Excel
-
----
-
+  
 ## Fonctionnalités Avancées
 
 ### 1. Recherche
@@ -61,8 +57,6 @@ Suivre les activités professionnelles et académiques à l'ETML.
 
 - Ajouter des notes aux entrées
 
----
-
 ## Phases du Projet
 
 1. Conception: 2 semaines
@@ -70,8 +64,6 @@ Suivre les activités professionnelles et académiques à l'ETML.
 3. Fonctionnalités avancées: 2-4 semaines
 4. Tests: 2 semaines
 5. Déploiement: 1 semaine
-
----
 
 ## Contraintes
 
