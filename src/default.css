@@ -1,0 +1,422 @@
+:root {
+    /* Couleurs de Base - Mode Clair */
+    --couleur-fond: #FFFFFF;
+    --couleur-texte: #333333;
+    --couleur-principale: #4CAF50;
+    --couleur-accent: #FFC107;
+
+    /* Typographie */
+    --police-principale: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --taille-texte-normale: 16px;
+    --taille-texte-grande: 20px;
+    --taille-titre: 28px;
+
+    /* Onglets et Boutons */
+    --couleur-fond-onglet: #eae8e8;
+    --couleur-onglet: #E0E0E0;
+    --couleur-onglet-actif: #FFFFFF;
+    --couleur-texte-onglet: #757575;
+    --couleur-texte-onglet-actif: #333333;
+    --couleur-bouton: #007BFF;
+    --couleur-texte-bouton: #FFFFFF;
+    --bouton-ombre: 0px 4px 8px rgba(0, 123, 255, 0.2);
+    --bouton-radius: 4px;
+
+    /* Espacements et Bordures */
+    --espace-petit: 8px;
+    --espace-moyen: 16px;
+    --espace-grand: 32px;
+    --espace-extra-grand: 64px;
+    --bordure-radius: 5px;
+    --ombre-box: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    --ombre-focus: 0px 0px 3px #FFC107;
+
+    /* Transitions */
+    --transition-standard: all 0.3s ease;
+}
+
+/* Styles pour le mode sombre */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --couleur-fond: #121212;
+        --couleur-texte: #E0E0E0;
+        --couleur-principale: #81C784;
+        --couleur-accent: #FFD54F;
+        --couleur-onglet: #333333;
+        --couleur-onglet-actif: #121212;
+        --couleur-texte-onglet: #CCCCCC;
+        --couleur-texte-onglet-actif: #E0E0E0;
+        --couleur-bouton: #1E88E5;
+        --bouton-ombre: 0px 4px 8px rgba(30, 136, 229, 0.2);
+    }
+}
+
+h1 {
+    font-family: var(--police-principale);
+    font-size: var(--taille-titre);
+    color: var(--couleur-principale);
+    margin-bottom: var(--espace-moyen);
+    text-align: center;
+    /* Centrer le titre si cela convient au design de votre page */
+    font-weight: normal;
+    /* Pour un look moderne et épuré, évitez le gras excessif */
+    line-height: 1.2;
+    /* Pour une meilleure lisibilité */
+    text-transform: uppercase;
+    /* Optionnel, pour un aspect plus stylisé */
+    letter-spacing: 1.5px;
+    /* Espacement des lettres pour un effet plus aéré */
+    transition: color var(--transition-standard);
+    /* Transition pour le mode sombre */
+
+    /* Ombre pour donner un effet en profondeur, optionnel */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    h1 {
+        color: var(--couleur-accent);
+        /* Couleur différente pour le mode sombre */
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.1);
+        /* Ombre adaptée pour le mode sombre */
+    }
+}
+
+.header-titre {
+    text-align: center;
+    padding: var(--espace-moyen) 0;
+    background-color: var(--couleur-fond);
+}
+
+.header-titre h1 {
+    font-family: var(--police-principale);
+    font-size: var(--taille-titre);
+    color: var(--couleur-principale);
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.tab {
+    display: flex;
+    gap: var(--espace-petit);
+    margin-bottom: var(--espace-moyen);
+    background-color: var(--couleur-fond-onglet);
+}
+
+.tablinks {
+    padding: var(--espace-petit) var(--espace-moyen);
+    border: none;
+    border-radius: 10px 10px 0 0;
+    background-color: var(--couleur-onglet);
+    color: var(--couleur-texte-onglet);
+    transition: background-color var(--transition-standard);
+    cursor: pointer;
+
+}
+
+.tablinks:hover,
+.tablinks:focus {
+    background-color: var(--couleur-onglet-actif);
+    outline: none;
+}
+
+.tablinksAction {
+    background-color: var(--couleur-principale);
+    color: var(--couleur-texte);
+    font-weight: bold;
+    display: flex;
+}
+
+.tablinksAction:hover,
+.tablinksAction:focus {
+    background-color: var(--couleur-accent);
+}
+
+.tablinks.active,
+.tablinksAction.active {
+    background-color: var(--couleur-onglet-actif);
+    color: var(--couleur-texte-onglet-actif);
+    border-bottom: 2px solid var(--couleur-accent);
+}
+
+.tabcontent {
+
+    padding: var(--espace-moyen);
+    background-color: var(--couleur-fond);
+}
+
+.tabcontent h2 {
+    color: var(--couleur-principale);
+    text-align: center;
+    margin-bottom: var(--espace-moyen);
+}
+
+#journaux {
+    display: none;
+}
+
+.journal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espace-petit);
+}
+
+.journal-info {
+    border: 1px solid var(--couleur-accent);
+    padding: var(--espace-moyen);
+    margin-bottom: var(--espace-moyen);
+}
+
+.journal-info legend {
+    font-weight: bold;
+    color: var(--couleur-principale);
+}
+
+.custom-task-details,
+.journal-details,
+.date-range {
+    border: 1px solid var(--couleur-accent);
+    padding: var(--espace-moyen);
+    margin-bottom: var(--espace-moyen);
+}
+
+.custom-task-details legend,
+.journal-details legend,
+.date-range legend {
+    font-weight: bold;
+    color: var(--couleur-principale);
+}
+
+.custom-task-details .form-row {
+    display: flex;
+    column-count: 2;
+    justify-content: space-between;
+    margin-bottom: var(--espace-petit);
+}
+
+.custom-task-details .form-field {
+    flex: 1; margin-right: var(--espace-petit);
+}
+.custom-task-details .form-field:last-child {
+    margin-right: 0;
+}
+
+#taskTable {
+    font-size: small;
+}
+
+/* Style pour le conteneur de la table */
+.table-container {
+    max-height: 100px; /* Ajustez la hauteur maximale selon vos besoins */
+    overflow-y: scroll; /* Activer le défilement vertical */
+    overflow-x: hidden;
+}
+
+/* Style pour la table (facultatif) */
+#taskTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#taskTable th, #taskTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+
+
+.hidden {
+    display: none;
+}
+
+/* Style pour l'info-bulle */
+.tooltip {
+    position: relative;
+    cursor: pointer; /* Affiche une main au survol */
+}
+
+/* Style pour le texte de l'info-bulle */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Affiche l'info-bulle lorsque survolé */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Deux colonnes de taille égale */
+    gap: var(--espace-moyen);
+    /* Espacement entre les colonnes */
+}
+
+.form-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--espace-petit);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--espace-petit);
+}
+
+.custom-select,
+.form-field input[type="date"] {
+    padding: var(--espace-petit);
+    border: 1px solid var(--couleur-onglet);
+    border-radius: var(--bordure-radius);
+}
+
+.weekofworks {
+    display: flex;
+    justify-content: space-between;
+}
+
+.weekofworks label,
+.weekofworks input[type="checkbox"] {
+    margin-right: var(--espace-petit);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field label {
+    margin-bottom: var(--espace-petit);
+}
+
+.form-field input {
+    padding: var(--espace-petit);
+    border: 1px solid var(--couleur-onglet);
+    border-radius: var(--bordure-radius);
+}
+
+.proprietaire-info {
+    border: 1px solid var(--couleur-accent);
+    padding: var(--espace-moyen);
+    margin-bottom: var(--espace-moyen);
+}
+
+.proprietaire-info legend {
+    font-weight: bold;
+    color: var(--couleur-principale);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--espace-moyen);
+}
+
+.custom-select {
+    padding: var(--espace-petit);
+    border: 1px solid var(--couleur-onglet);
+    border-radius: var(--bordure-radius);
+    background-color: var(--couleur-fond);
+    color: var(--couleur-texte);
+}
+
+.option-green {
+    color: green;
+}
+
+.option-orange {
+    color: orange;
+}
+
+.option-red {
+    color: red;
+}
+
+.btn-style {
+    padding: var(--espace-petit) var(--espace-moyen);
+    background-color: var(--couleur-bouton);
+    /* Utilisez une couleur appropriée de votre choix */
+    color: var(--couleur-texte-bouton);
+    /* Assurez-vous que le texte est lisible */
+    border: none;
+    border-radius: var(--bordure-radius);
+    margin-bottom: 3px;
+    margin-right: 5px;
+    cursor: pointer;
+    transition: background-color var(--transition-standard);
+}
+
+.btn-style:hover {
+    background-color: var(--couleur-accent);
+    /* Changement de couleur au survol pour une meilleure interactivité */
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--espace-moyen);
+}
+
+.grid-item {
+    padding: var(--espace-petit);
+    border: 1px solid var(--couleur-accent);
+}
+
+.informations-journal,
+.proprietaire-journal {
+    grid-column: 1 / 2;
+    grid-row: auto;
+}
+
+
+.btn-style {
+    margin-bottom: var(--espace-petit);
+    /* autres styles pour le bouton */
+}
+
+
+.button-container {
+    grid-column: 1;
+    /* Place le bouton dans la deuxième colonne */
+    grid-row: 2;
+    /* Place le bouton dans la troisième ligne */
+    display: flex;
+    justify-content: flex-end;
+    /* Aligner à droite */
+    align-items: flex-start;
+    /* Aligner en bas */
+}
+
+.alert-popup {
+    display: none;
+    /* Caché par défaut */
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    background-color: #f44336;
+    /* Couleur de fond */
+    color: white;
+    /* Couleur du texte */
+    text-align: center;
+    border-radius: 5px;
+    z-index: 1000;
+}
