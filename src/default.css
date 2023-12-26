@@ -4,9 +4,12 @@
     --couleur-texte: #333333;
     --couleur-principale: #4CAF50;
     --couleur-accent: #FFC107;
+    --couleur-entreesJournal: #40007b;
+    --couleur-entreesPlanif: #003f5b;
 
     /* Typographie */
     --police-principale: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --taille-texte-petit: 10px;
     --taille-texte-normale: 16px;
     --taille-texte-grande: 20px;
     --taille-titre: 28px;
@@ -123,7 +126,7 @@ h1 {
 
 .tablinksAction {
     background-color: var(--couleur-principale);
-    color: var(--couleur-texte);
+    color: var(--couleur-texte-bouton);
     font-weight: bold;
     display: flex;
 }
@@ -141,14 +144,12 @@ h1 {
 }
 
 .tabcontent {
-
     padding: var(--espace-moyen);
     background-color: var(--couleur-fond);
 }
 
 .tabcontent h2 {
     color: var(--couleur-principale);
-    text-align: center;
     margin-bottom: var(--espace-moyen);
 }
 
@@ -196,8 +197,10 @@ h1 {
 }
 
 .custom-task-details .form-field {
-    flex: 1; margin-right: var(--espace-petit);
+    flex: 1;
+    margin-right: var(--espace-petit);
 }
+
 .custom-task-details .form-field:last-child {
     margin-right: 0;
 }
@@ -208,8 +211,10 @@ h1 {
 
 /* Style pour le conteneur de la table */
 .table-container {
-    max-height: 100px; /* Ajustez la hauteur maximale selon vos besoins */
-    overflow-y: scroll; /* Activer le défilement vertical */
+    max-height: 140px;
+    /* Ajustez la hauteur maximale selon vos besoins */
+    overflow-y: scroll;
+    /* Activer le défilement vertical */
     overflow-x: hidden;
 }
 
@@ -219,7 +224,8 @@ h1 {
     border-collapse: collapse;
 }
 
-#taskTable th, #taskTable td {
+#taskTable th,
+#taskTable td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
@@ -234,32 +240,16 @@ h1 {
 /* Style pour l'info-bulle */
 .tooltip {
     position: relative;
-    cursor: pointer; /* Affiche une main au survol */
+    cursor: pointer;
+    /* Affiche une main au survol */
 }
 
 /* Style pour le texte de l'info-bulle */
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 200px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
     position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
 }
 
-/* Affiche l'info-bulle lorsque survolé */
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -385,12 +375,10 @@ h1 {
     grid-row: auto;
 }
 
-
 .btn-style {
     margin-bottom: var(--espace-petit);
     /* autres styles pour le bouton */
 }
-
 
 .button-container {
     grid-column: 1;
@@ -404,11 +392,30 @@ h1 {
     /* Aligner en bas */
 }
 
+#buttonsJournal button {
+    background-color: var(--couleur-bouton);
+    color: var(--couleur-texte-bouton);
+    padding: var(--espace-petit) var(--espace-moyen);
+    margin: var(--espace-petit);
+    border: none;
+    border-radius: var(--bouton-radius);
+    cursor: pointer;
+    transition: var(--transition-standard);
+}
+
+#buttonsJournal button:hover {
+    background-color: var(--couleur-bouton);
+    /* Utilise la couleur du bouton */
+    color: var(--couleur-texte);
+    opacity: 0.1;
+    /* Légèrement plus opaque */
+}
+
 .alert-popup {
     display: none;
     /* Caché par défaut */
     position: fixed;
-    bottom: 10px;
+    bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     padding: 10px;
@@ -418,5 +425,176 @@ h1 {
     /* Couleur du texte */
     text-align: center;
     border-radius: 5px;
+    z-index: 1;
+}
+
+.jour {
+    border: 1px solid var(--ombre-box);
+    /* Utilisation de la variable pour la bordure */
+    padding: var(--espace-petit);
+    /* Utilisation de la variable pour l'espacement intérieur */
+    margin: var(--espace-moyen) auto;
+    /* Centrage horizontal et espace vertical */
+    background-color: var(--couleur-fond-onglet);
+    /* Couleur de fond pour chaque jour */
+    border-radius: var(--bordure-radius);
+    /* Coins arrondis */
+    width: 90%;
+    /* Occupe 90% de la largeur du parent */
+    box-sizing: border-box;
+    /* Inclut padding et border dans la largeur */
+    box-shadow: var(--ombre-box);
+    /* Ajout d'une ombre subtile */
+}
+
+.jour:nth-child(odd) {
+    background-color: var(--couleur-onglet);
+    /* Couleur de fond alternative pour les jours impairs */
+}
+
+.entree {
+    padding: 1px;
+    /* Autres styles pour les entrées, si nécessaire */
+}
+
+footer {
+    position: fixed;
+    /* Fixe le pied de page au bas de la fenêtre du navigateur */
+    bottom: 0;
+    /* Aligné en bas */
+    left: 0;
+    /* Étendu sur toute la largeur */
+    width: 100%;
+    /* Assurez-vous qu'il s'étend sur toute la largeur de la fenêtre */
+    background-color: var(--couleur-fond);
+    color: var(--couleur-texte);
+    padding: var(--espace-petit) 0;
+    font-family: var(--police-principale);
+    font-size: var(--taille-texte-petit);
+    border-top: 1px solid var(--ombre-box);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     z-index: 1000;
+    /* S'assure que le pied de page reste au-dessus des autres éléments */
+}
+
+footer p {
+    margin: 0 var(--espace-petit);
+    line-height: 1;
+}
+
+@media (max-width: 600px) {
+    footer {
+        flex-direction: column;
+        padding: var(--espace-moyen) 0;
+    }
+
+    footer p {
+        margin: var(--espace-petit) 0;
+        text-align: center;
+        /* Centre le texte sur les petits écrans */
+    }
+}
+
+/* PLANIFICATION */
+#parentSequencePlannification [class^="sequence_"] {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--couleur-entreesPlanif);
+    /* Utilise une variable CSS pour la couleur de fond */
+    color: var(--couleur-texte);
+    /* Couleur du texte */
+    border-radius: var(--bordure-radius);
+    /* Arrondissement des coins */
+    box-shadow: var(--ombre-box);
+    /* Ajoute une ombre subtile */
+    border: none;
+    /* Supprime la bordure */
+}
+
+#parentSequenceJournal [class^="sequence_"] {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--couleur-entreesJournal);
+    /* Utilise une variable CSS pour la couleur de fond */
+    color: var(--couleur-texte);
+    /* Couleur du texte */
+    border-radius: var(--bordure-radius);
+    /* Arrondissement des coins */
+    box-shadow: var(--ombre-box);
+    /* Ajoute une ombre subtile */
+    border: none;
+    /* Supprime la bordure */
+}
+
+
+.div-special {
+    background-color: #f0f0f0;
+    padding: var(--espace-petit);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-style: italic;
+    text-align: right;
+}
+
+.jour {
+    border: 1px dashed #ddd;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.periode_0:nth-child(even),
+.periode_1:nth-child(even),
+.periode_2:nth-child(even),
+.periode_3:nth-child(even),
+.periode_4:nth-child(even) {
+    background-color: #f2f2f2;
+    /* Light grey for even periods */
+}
+
+.periode_0:nth-child(odd),
+.periode_1:nth-child(odd),
+.periode_2:nth-child(odd),
+.periode_3:nth-child(odd),
+.periode_4:nth-child(odd) {
+    background-color: #fff;
+    /* White for odd periods */
+}
+
+
+.entree {
+    display: grid;
+    grid-template-columns: auto auto 30% 30% auto 5% 5%;
+    /* Ajustement des largeurs de colonnes */
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.entree input,
+.entree select {
+    width: 100%;
+    /* Chaque élément occupe la pleine largeur de la colonne */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    /* Inclut padding et bordures dans le calcul de la largeur */
+}
+
+.titleSequence {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 24px;
+    /* Larger font size */
+    font-weight: bold;
+    margin-bottom: 15px;
+    /* Increased margin */
+    color: var(--couleur-texte-bouton);
+    text-transform: uppercase;
+    /* Uppercase text */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    /* Text shadow for a modern effect */
+
 }

@@ -8,7 +8,7 @@
         <title>JTD IQ V2023</title>
     </head>
 
-    <body onload="updateTaskTable()">
+    <body onload="initJndt()">
         <!-- Titre de la page -->
         <header class="header-titre">
             <h1>Journal de travail</h1>
@@ -33,10 +33,13 @@
         </nav>
 
         <main>
-            <section id="journaux" class="tabcontent">
+            <section id="Journaux" class="tabcontent">
                 <h2>Liste des Journaux</h2>
-                <div class="journal-list"> </div>
+                <div id="messageJournaux" class="journal-list"> 
+
+                </div>
             </section>
+
             <section id="NouveauJournal" class="tabcontent">
                 <div class="form-grid">
                     <fieldset class="journal-info">
@@ -124,8 +127,7 @@
                             <label for="frequenceParSemaine">Fréquence par
                                 semaine:</label>
 
-                            <div class="weekofworks" id="frequenceParSemaine"
-                                onclick="CheckIfValid()">
+                            <div class="weekofworks" id="frequenceParSemaine">
 
                                 <label for="lundi">Lu</label>
                                 <input type="checkbox" id="lundi" name="jours"
@@ -188,7 +190,7 @@
                                 Ajouter
                             </button>
                         </fieldset>
-                        
+
                         <script>
                             function callAddCustomTask() {
                                 var taskName = document.getElementById('taskName').value;
@@ -240,18 +242,15 @@
                                     <thead>
                                         <tr>
                                             <th>Nom</th>
-                                            <th>Catégorie</th>                                           
+                                            <th>Catégorie</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <!-- Les lignes du tableau seront ajoutées ici -->
                                     </tbody>
                                 </table>
-                                
                             </div>
-                           
                         </fieldset>
-
                     </div>
                 </div>
                 <div class="button-container">
@@ -262,20 +261,46 @@
                     </button>
                 </div>
             </section>
+
             <section id="BilanGraphique" class="tabcontent">
                 <h3>Bilan Graphique</h3>
+                <div id="messageBilanGraphique">
+
+                </div>       
                 <p>Contenu du Bilan Graphique.</p>
             </section>
             <section id="Gantt" class="tabcontent">
                 <h3>Gantt</h3>
+                <div id="messageGantt">
+
+                </div> 
                 <p>Contenu de Gantt.</p>
             </section>
             <section id="Planification" class="tabcontent">
-                <h3>Planification</h3>
-                <p>Contenu de la Planification.</p>
+                <div id="buttonsPlanification">
+                    <button type="button" onclick="ajouterNouvelleSequence(onglets.PLANIFICATION)">Ajouter Séquence</button>
+                    <button type="button" onclick="sauvegarderJournal(onglets.PLANIFICATION)">Sauvegarder Journal</button>
+                    <button type="button" onclick="imprimer(onglets.PLANIFICATION)">Imprimer Journal</button>
+                    <button type="button" onclick="exporter(onglets.PLANIFICATION)">Exporter Journal</button>
+                </div>
+               
+                <div id="messagePlanification"></div>
+
+                <div id="parentSequencePlannification"></div>
             </section>
+
             <section id="Journal" class="tabcontent">
-                <!-- le contenu du journal, de la plannification, du bilan graphique et du Gantt -->
+                <div id="buttonsJournal">
+                    <button type="button" onclick="ajouterNouvelleSequence(onglets.JOURNAL)">Ajouter Séquence</button>
+                    <button type="button" onclick="sauvegarderJournal(onglets.JOURNAL)">Sauvegarder Journal</button>
+                    <button type="button" onclick="imprimer(onglets.JOURNAL)">Imprimer Journal</button>
+                    <button type="button" onclick="exporter(onglets.JOURNAL)">Exporter Journal</button>
+                </div>
+                
+                <div id="messageJournal"></div>
+
+                <div id="parentSequenceJournal"></div>
+
             </section>
         </main>
 
@@ -284,12 +309,6 @@
 
         <div id="alertPopup" class="alert-popup">Message d'alerte</div>
 
-        <footer>
-            <p>ETML/CFPV</p>
-            <p>author: HCS</p>
-            <p>17.12.2023</p>
-        </footer>
-
+        <footer> <p>ETML/CFPV</p> <p>author: HCS</p> <p>17.12.2023</p>  </footer>
     </body>
-
 </html>
