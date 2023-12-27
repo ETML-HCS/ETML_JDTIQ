@@ -100,6 +100,8 @@ h1 {
     line-height: 1.2;
 }
 
+
+
 .tab {
     display: flex;
     gap: var(--espace-petit);
@@ -143,6 +145,7 @@ h1 {
     border-bottom: 2px solid var(--couleur-accent);
 }
 
+
 .tabcontent {
     padding: var(--espace-moyen);
     background-color: var(--couleur-fond);
@@ -153,9 +156,13 @@ h1 {
     margin-bottom: var(--espace-moyen);
 }
 
+
+/* Page journaux */
+
 #journaux {
     display: none;
 }
+
 
 .journal-list {
     display: flex;
@@ -163,13 +170,44 @@ h1 {
     gap: var(--espace-petit);
 }
 
-.journal-info {
+
+/* Contenu nouveau journal */
+#NouveauJournal .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Deux colonnes de taille égale */
+    gap: var(--espace-petit);
+    /* Espacement entre les colonnes */ 
+}
+
+#NouveauJournal .form-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--espace-petit);
+}
+
+/* Media query pour les écrans plus petits */
+@media screen and (max-width: 1100px) {
+    #NouveauJournal .form-grid,
+    #NouveauJournal .form-group {
+        grid-template-columns: 1fr; /* Une seule colonne sur petits écrans */
+    }
+}
+
+
+#NouveauJournal .form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--espace-petit);
+}
+
+#NouveauJournal .journal-info {
     border: 1px solid var(--couleur-accent);
     padding: var(--espace-moyen);
     margin-bottom: var(--espace-moyen);
 }
 
-.journal-info legend {
+#NouveauJournal .journal-info legend {
     font-weight: bold;
     color: var(--couleur-principale);
 }
@@ -231,8 +269,6 @@ h1 {
     text-align: left;
 }
 
-
-
 .hidden {
     display: none;
 }
@@ -250,25 +286,7 @@ h1 {
     position: absolute;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    /* Deux colonnes de taille égale */
-    gap: var(--espace-moyen);
-    /* Espacement entre les colonnes */
-}
 
-.form-group {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--espace-petit);
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: var(--espace-petit);
-}
 
 .custom-select,
 .form-field input[type="date"] {
@@ -428,24 +446,7 @@ h1 {
     z-index: 1;
 }
 
-.jour {
-    border: 1px solid var(--ombre-box);
-    /* Utilisation de la variable pour la bordure */
-    padding: var(--espace-petit);
-    /* Utilisation de la variable pour l'espacement intérieur */
-    margin: var(--espace-moyen) auto;
-    /* Centrage horizontal et espace vertical */
-    background-color: var(--couleur-fond-onglet);
-    /* Couleur de fond pour chaque jour */
-    border-radius: var(--bordure-radius);
-    /* Coins arrondis */
-    width: 90%;
-    /* Occupe 90% de la largeur du parent */
-    box-sizing: border-box;
-    /* Inclut padding et border dans la largeur */
-    box-shadow: var(--ombre-box);
-    /* Ajout d'une ombre subtile */
-}
+
 
 .jour:nth-child(odd) {
     background-color: var(--couleur-onglet);
@@ -528,7 +529,6 @@ footer p {
     /* Supprime la bordure */
 }
 
-
 .div-special {
     background-color: #f0f0f0;
     padding: var(--espace-petit);
@@ -539,36 +539,62 @@ footer p {
 }
 
 .jour {
-    border: 1px dashed #ddd;
-    padding: 5px;
-    margin-bottom: 5px;
+    border: 1px solid var(--ombre-box);
+    /* Utilisation de la variable pour la bordure */
+    padding: var(--espace-petit);
+    /* Utilisation de la variable pour l'espacement intérieur */
+    margin: var(--espace-moyen) auto;
+    /* Centrage horizontal et espace vertical */
+    background-color: var(--couleur-fond-onglet);
+    /* Couleur de fond pour chaque jour */
+    border-radius: var(--bordure-radius);
+    /* Coins arrondis */
+    width: 95%;
+    /* Occupe 90% de la largeur du parent */
+    box-sizing: border-box;
+    /* Inclut padding et border dans la largeur */
+    box-shadow: var(--ombre-box);
+    /* Ajout d'une ombre subtile */
 }
 
-.periode_0:nth-child(even),
-.periode_1:nth-child(even),
-.periode_2:nth-child(even),
-.periode_3:nth-child(even),
-.periode_4:nth-child(even) {
-    background-color: #f2f2f2;
-    /* Light grey for even periods */
-}
+/* Style de base pour tous les éléments .periode_ */
 
-.periode_0:nth-child(odd),
-.periode_1:nth-child(odd),
-.periode_2:nth-child(odd),
-.periode_3:nth-child(odd),
-.periode_4:nth-child(odd) {
-    background-color: #fff;
-    /* White for odd periods */
-}
-
+[class^="periode_"] {
+    color: var(--couleur-texte);
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-left: 4px solid var(--couleur-bouton);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 1.1em;
+    line-height: 1.1;
+    box-sizing: border-box;
+  }
+  
+  /* Couleur de fond pour les éléments pairs */
+  [class^="periode_"]:nth-child(2n) {
+    background-color: var(--couleur-fond-onglet);
+  }
+  
+  /* Couleur de fond pour les éléments impairs */
+  [class^="periode_"]:nth-child(2n+1) {
+    background-color: var(--couleur-fond);
+  }
+  
+  /* Style pour les titres à l'intérieur des éléments .periode_ */
+  [class^="periode_"] h1,
+  [class^="periode_"] h2,
+  [class^="periode_"] h3 {
+    color: var(--couleur-bouton);
+    margin-top: 0;
+    padding-top: 0;
+  }
 
 .entree {
     display: grid;
-    grid-template-columns: auto auto 30% 30% auto 5% 5%;
+    grid-template-columns: 7ch 18ch auto 20ch 12ch 5ch 2ch 2ch;
     /* Ajustement des largeurs de colonnes */
-    gap: 10px;
-    margin-bottom: 5px;
+    gap: 3px;
+    margin-bottom: 2px;
 }
 
 .entree input,
@@ -581,6 +607,44 @@ footer p {
     box-sizing: border-box;
     /* Inclut padding et bordures dans le calcul de la largeur */
 }
+
+.btnSuppression,
+.btnAjouter {
+    padding: 5px 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 9px;
+    transition: background-color 0.3s ease;
+    font-weight: bolder;
+}
+
+.btnSuppression {
+    background-color: #ff5b5b;
+    /* rouge */
+    color: white;
+    /* couleur du texte changée pour noir */
+}
+
+.btnSuppression:hover {
+    background-color: #fd0000;
+    /* rouge plus foncé au survol */
+}
+
+.btnAjouter {
+    background-color: #5ac95e;
+    /* vert */
+    color: white;
+    /* couleur du texte changée pour noir */
+}
+
+.btnAjouter:hover {
+    background-color: #45a049;
+    /* vert plus foncé au survol */
+}
+
+
 
 .titleSequence {
     display: flex;
@@ -596,5 +660,4 @@ footer p {
     /* Uppercase text */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     /* Text shadow for a modern effect */
-
 }

@@ -13,42 +13,63 @@ Développement d'une application pour la gestion des journaux dans une école te
 */
 
 // Déclaration globale
-let sequenceNumber = 0
-let sequenceCalDate = 0
+let sequenceNumber = [0, 0]
+let sequenceCalDate = [0, 0]
 let dataJournal = null
 let defaultTasks = [
   {
-    id: 'absence',
-    name: 'Absences/Maladie',
-    category: 'Administratif',
-    description: "Jours d'absence pour maladie ou autres raisons"
-  },
-  {
     id: 'etude',
     name: 'Etude/Analyse',
-    category: 'Recherche',
-    description: "Activités liées à l'étude et à l'analyse de projet"
-  },
-  {
-    id: 'developpement',
-    name: 'Développement',
-    category: 'Travail',
-    description: 'Tâches de développement et de programmation'
-  },
-  {
-    id: 'test',
-    name: 'Test',
-    category: 'Validation',
-    description: 'Activités de test et de validation de fonctionnalités'
+    category: 'Initiation',
+    description: 'Identifier les besoins et établir une base pour le projet.'
   },
   {
     id: 'reunion',
     name: 'Réunion',
-    category: 'Communication',
-    description: 'Séances de réunion et de discussion'
+    category: 'Planification',
+    description:
+      'Planifier le projet, définir les objectifs et les ressources nécessaires.'
+  },
+  {
+    id: 'redaction',
+    name: 'Rédaction',
+    category: 'Documentation',
+    description:
+      'Rédaction de documents de planification comme le cahier des charges.'
+  },
+  {
+    id: 'developpement',
+    name: 'Développement',
+    category: 'Exécution',
+    description: 'Exécuter les tâches de développement conformément au plan.'
+  },
+  {
+    id: 'test',
+    name: 'Test',
+    category: 'Contrôle de Qualité',
+    description: 'Tester les fonctionnalités pour assurer la qualité.'
+  },
+  {
+    id: 'evaluationCompetences',
+    name: 'Évaluation des Compétences',
+    category: 'Évaluation',
+    description: "Évaluer les compétences et la performance de l'équipe."
+  },
+  {
+    id: 'autoFormation',
+    name: 'Autoformation',
+    category: 'Amélioration Continue',
+    description:
+      "Promouvoir l'auto-apprentissage pour améliorer les compétences."
+  },
+  {
+    id: 'absence',
+    name: 'Absences/Maladie',
+    category: 'Ressources Humaines',
+    description: 'Gérer les absences et les ressources humaines.'
   }
 ]
-
+// provisoir normalement json ....
 const CVacances = {
   hiver: { debut: new Date('2023-12-23'), fin: new Date('2024-01-07') },
   relaches: { debut: new Date('2024-02-10'), fin: new Date('2024-02-18') },
@@ -382,6 +403,11 @@ function createInputField (type, name, placeholder, options, className) {
     field = document.createElement('input')
     field.type = type
     field.placeholder = placeholder
+    if (type === 'number') {
+      field.step = 5
+      field.max = dataJournal.config.baseDuration
+      field.min = 0
+    }
   }
 
   field.name = name
@@ -395,6 +421,7 @@ function ajouterNouvelleSequence (onglet) {
     showAlert("dataJournal n'est pas correctement initialisé.", 'error')
     return
   }
+
   var typeProjet = dataJournal.config.projectType // 'court', 'moyen', 'long', ou 'tpi'
   var precision = dataJournal.config.timePrecision // 3, 6, ou 9 lignes par heure
   var dureeProjet =
@@ -405,41 +432,80 @@ function ajouterNouvelleSequence (onglet) {
   var nombreJours = frequence.length
 
   let parentElement = getParentElement(onglet)
+
   if (!parentElement) {
     showAlert("L'élément parent pour les séquences n'existe pas.", 'error')
     return
   }
 
-  sequenceDiv = creerDivSequence()
+  sequenceDiv = creerDivSequence(onglet)
 
+  // affiche l'entete des entrées
+  let entreesHeader = document.getElementById('entreesHeader');
+  entreesHeader.style.cssText = `
+      display: grid;
+      grid-template-columns: 7ch 18ch auto 20ch 12ch 5ch 2ch 2ch;
+      gap: 3px;
+      position: fixed;
+      top: 264px; /* Positionne l'en-tête à 266px du haut */
+      background: white;
+      padding-left: 80px; /* Ajouter du padding à l'intérieur de l'en-tête */
+      padding-right:80px;
+      box-shadow: 0px 2px 4px rgba(0,0,0,0.1); /* Optionnel, pour une meilleure visibilité */
+      left: 0;
+      right: 0;
+      box-sizing: border-box; /* Inclut padding et border dans la largeur */
+      font-size: 1.1em;
+  `;
+
+  
   // Pour chaque jour
   for (let i = 0; i < nombreJours; i++) {
     let jour = frequence[i]
     sequenceDiv.appendChild(creerDivJour(jour, dureeProjet, precision))
   }
 
+  // // Ajouter un bouton pour ajouter une nouvelle entrée à la fin de la séquence
+  // let btnAjouterEntree = document.createElement('button');
+  // btnAjouterEntree.innerText = 'Ajouter une nouvelle entrée';
+  // btnAjouterEntree.onclick = function() {
+  //   sequenceDiv.appendChild(creerDivEntree());
+  // };
+  // sequenceDiv.appendChild(btnAjouterEntree);
+
   parentElement.prepend(sequenceDiv)
 }
 
 // fonctions pour ajouter une nouvelle séquence
 
-function creerDivSequence () {
+function creerDivSequence (onglet) {
   // Obtenir la prochaine date de la séquence et vérifier les jours fériés/vacances
-
-  let resultNextDate = getNextDate(dataJournal.firstSeq)
-  sequenceNumber++
-  sequenceCalDate++
-
   let sequenceDiv = document.createElement('div')
-  sequenceDiv.classList = 'sequence_' + sequenceNumber
-
+  let resultNextDate = getNextDate(dataJournal.firstSeq, onglet)
   // Créer et ajouter un élément pour afficher les informations de la séquence
   let infoDiv = document.createElement('div')
-  infoDiv.innerHTML =
-    'Séquence n° ' +
-    sequenceNumber +
-    '<div> Date : '+
-    resultNextDate.date.toLocaleDateString() + '</div>'
+
+  if (onglets.JOURNAL == onglet) {
+    sequenceCalDate[0]++
+    sequenceNumber[0]++
+    sequenceDiv.classList = 'sequence_' + sequenceNumber[0]
+    infoDiv.innerHTML =
+      'Séquence n° ' +
+      sequenceNumber[0] +
+      '<div> Date : ' +
+      resultNextDate.date.toLocaleDateString() +
+      '</div>'
+  } else if (onglets.PLANIFICATION == onglet) {
+    sequenceCalDate[1]++
+    sequenceNumber[1]++
+    sequenceDiv.classList = 'sequence_' + sequenceNumber[1]
+    infoDiv.innerHTML =
+      'Séquence n° ' +
+      sequenceNumber[1] +
+      '<div> Date : ' +
+      resultNextDate.date.toLocaleDateString() +
+      '</div>'
+  }
 
   infoDiv.className = 'titleSequence'
 
@@ -458,7 +524,7 @@ function creerDivJour (jour, dureeProjet, precision) {
   divJour.id = 'jour_' + jour
   divJour.className = 'jour'
 
-  divJour.innerHTML = '<h3>' + CJours[jour] + '<h3/>'
+  divJour.innerHTML = '<h3>' + CJours[jour] + '</h3>'
 
   for (let p = 0; p < dureeProjet; p++) {
     divJour.appendChild(creerDivPeriode(p, precision))
@@ -467,12 +533,12 @@ function creerDivJour (jour, dureeProjet, precision) {
   return divJour
 }
 
-function creerDivPeriode (periode, precision) {
+function creerDivPeriode (periode, precision, onglet) {
   let periodesDiv = document.createElement('div')
   periodesDiv.className = 'periode_' + periode
 
   for (let e = 0; e < precision; e++) {
-    periodesDiv.appendChild(creerDivEntree())
+    periodesDiv.appendChild(creerDivEntree(onglet))
   }
 
   return periodesDiv
@@ -519,6 +585,15 @@ function creerDivEntree () {
     createInputField('text', 'tag', 'Tag', null, 'input-tag')
   )
 
+  // Bouton de suppression
+  let btnSupprimer = document.createElement('button')
+  btnSupprimer.innerText = 'X'
+  btnSupprimer.className = 'btnSuppression'
+  btnSupprimer.onclick = function () {
+    entreeDiv.remove()
+  }
+  entreeDiv.appendChild(btnSupprimer)
+
   return entreeDiv
 }
 
@@ -532,13 +607,15 @@ function getParentElement (onglet) {
   return null
 }
 
-function getNextDate (firstDate) {
+function getNextDate (firstDate, onglet) {
   // Réinitialiser VResult
   VResult.date = null
   VResult.divSpecial = null
 
   let nextDate = new Date(firstDate)
-  nextDate.setDate(nextDate.getDate() + 7 * sequenceCalDate)
+  nextDate.setDate(
+    nextDate.getDate() + 7 * sequenceCalDate[onglets.JOURNAL == onglet ? 0 : 1]
+  )
 
   while (isVacances(nextDate) || isJourFerie(nextDate)) {
     if (isVacances(nextDate)) {
@@ -548,7 +625,7 @@ function getNextDate (firstDate) {
       let nbSemanesVacances = Math.ceil(
         (finVacances - nextDate) / (7 * 24 * 60 * 60 * 1000)
       ) // Calculer le nombre de semaines de vacances
-      sequenceCalDate += nbSemanesVacances // Incrémenter sequenceNumber en fonction de la durée des vacances
+      sequenceCalDate[onglets.JOURNAL == onglet ? 0 : 1] += nbSemanesVacances // Incrémenter sequenceNumber en fonction de la durée des vacances
       nextDate = new Date(finVacances.setDate(finVacances.getDate() + 1))
     } else if (isJourFerie(nextDate)) {
       VResult.divSpecial = createDivSpecial('Jour Férié')
@@ -616,9 +693,65 @@ function isVacances (date) {
   )
 }
 
-function sauvegarderJournal () {
-  // Logique pour sauvegarder le journal
+function saveEntries(onglet) {
+  let containerId, targetArray;
+
+  if (onglet === onglets.JOURNAL) {
+    containerId = 'parentSequenceJournal';
+    targetArray = dataJournal.journalEntries;
+  } else if (onglet === onglets.PLANIFICATION) {
+    containerId = 'parentSequencePlannification';
+    targetArray = dataJournal.planningEntries;
+  }
+
+  saveEntriesForContainer(containerId, targetArray);
 }
+
+function saveEntriesForContainer(containerId, targetArray) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    showAlert(`Le conteneur ${containerId} n'existe pas.`, 'error');
+    return;
+  }
+
+  // Sélection des divs de séquence qui ont une classe commençant par 'sequence_'
+  const sequenceDivs = container.querySelectorAll("[class^='sequence_']");
+  const entries = [];
+
+  sequenceDivs.forEach(sequenceDiv => {
+    const sequenceNumber = sequenceDiv.className.match(/sequence_(\d+)/)[1]; // Récupération du numéro de la séquence
+
+    // Sélection des divs de jour qui ont un ID au format 'jour_1', 'jour_2', etc.
+    const jourDivs = sequenceDiv.querySelectorAll("[id^='jour_']");
+
+    jourDivs.forEach(jourDiv => {
+      const jourNumber = jourDiv.id.match(/jour_(\d+)/)[1]; // Récupération du numéro du jour à partir de l'ID
+      const entreeDivs = jourDiv.querySelectorAll('.entree');
+
+      entreeDivs.forEach(div => {
+        const description = div.querySelector('.input-description').value;
+        const reference = div.querySelector('.input-ref').value;
+        
+        // Vérifiez si les champs description et ref sont remplis
+        if (description.trim() !== '' && reference.trim() !== '') {
+          const duration = div.querySelector('.input-duration').value;
+          const task = div.querySelector('.select-task').value;
+          const status = div.querySelector('.select-status').value;
+          const tag = div.querySelector('.input-tag').value;
+
+          entries.push({ sequenceNumber, jourNumber, duration, task, description, reference, status, tag });
+        } else {
+          div.remove();
+        }
+      });
+    });
+  });
+
+  targetArray.splice(0, targetArray.length, ...entries);
+}
+
+
+
 
 function imprimerJournal () {
   // Logique pour imprimer le journal

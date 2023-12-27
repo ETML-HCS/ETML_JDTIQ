@@ -41,6 +41,8 @@
             </section>
 
             <section id="NouveauJournal" class="tabcontent">
+
+                <p id="messageNouveauJournal"></p>
                 <div class="form-grid">
                     <fieldset class="journal-info">
                         <legend>Informations du Journal</legend>
@@ -101,9 +103,9 @@
                                     class="custom-select">
                                     <option value="12">12 lignes / 5
                                         [min]</option>
-                                    <option value="6">6 lignes / 10
+                                    <option value="6">6 lignes / 7.5
                                         [min]</option>
-                                    <option value="3">3 lignes / 20
+                                    <option value="3">3 lignes / 15
                                         [min]</option>
                                 </select>
                             </div>
@@ -279,20 +281,30 @@
             <section id="Planification" class="tabcontent">
                 <div id="buttonsPlanification">
                     <button type="button" onclick="ajouterNouvelleSequence(onglets.PLANIFICATION)">Ajouter Séquence</button>
-                    <button type="button" onclick="sauvegarderJournal(onglets.PLANIFICATION)">Sauvegarder Journal</button>
+                    <button type="button" onclick="saveEntries(onglets.PLANIFICATION)">Sauvegarder Planification</button>
                     <button type="button" onclick="imprimer(onglets.PLANIFICATION)">Imprimer Journal</button>
                     <button type="button" onclick="exporter(onglets.PLANIFICATION)">Exporter Journal</button>
                 </div>
                
                 <div id="messagePlanification"></div>
 
-                <div id="parentSequencePlannification"></div>
+                <div id="parentSequencePlannification">
+                    <div id="entreesHeader" style="display:none;">
+                        <div>Durée</div>
+                        <div>Tâche</div>
+                        <div>Description</div>
+                        <div>Référence</div>
+                        <div>Statut</div>
+                        <div>Tag</div>
+                    </div>
+
+                </div>
             </section>
 
             <section id="Journal" class="tabcontent">
                 <div id="buttonsJournal">
                     <button type="button" onclick="ajouterNouvelleSequence(onglets.JOURNAL)">Ajouter Séquence</button>
-                    <button type="button" onclick="sauvegarderJournal(onglets.JOURNAL)">Sauvegarder Journal</button>
+                    <button type="button" onclick="saveEntries(onglets.JOURNAL)">Sauvegarder Journal</button>
                     <button type="button" onclick="imprimer(onglets.JOURNAL)">Imprimer Journal</button>
                     <button type="button" onclick="exporter(onglets.JOURNAL)">Exporter Journal</button>
                 </div>
