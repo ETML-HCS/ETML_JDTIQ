@@ -159,10 +159,26 @@ h1 {
 
 /* Page journaux */
 
-#journaux {
-    display: none;
+#messageJournaux {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    padding: 10px;
 }
 
+.journal-entry {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.journal-icon {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
 
 .journal-list {
     display: flex;
@@ -177,7 +193,7 @@ h1 {
     grid-template-columns: 1fr 1fr;
     /* Deux colonnes de taille égale */
     gap: var(--espace-petit);
-    /* Espacement entre les colonnes */ 
+    /* Espacement entre les colonnes */
 }
 
 #NouveauJournal .form-group {
@@ -188,9 +204,11 @@ h1 {
 
 /* Media query pour les écrans plus petits */
 @media screen and (max-width: 1100px) {
+
     #NouveauJournal .form-grid,
     #NouveauJournal .form-group {
-        grid-template-columns: 1fr; /* Une seule colonne sur petits écrans */
+        grid-template-columns: 1fr;
+        /* Une seule colonne sur petits écrans */
     }
 }
 
@@ -568,26 +586,26 @@ footer p {
     font-size: 1.1em;
     line-height: 1.1;
     box-sizing: border-box;
-  }
-  
-  /* Couleur de fond pour les éléments pairs */
-  [class^="periode_"]:nth-child(2n) {
+}
+
+/* Couleur de fond pour les éléments pairs */
+[class^="periode_"]:nth-child(2n) {
     background-color: var(--couleur-fond-onglet);
-  }
-  
-  /* Couleur de fond pour les éléments impairs */
-  [class^="periode_"]:nth-child(2n+1) {
+}
+
+/* Couleur de fond pour les éléments impairs */
+[class^="periode_"]:nth-child(2n+1) {
     background-color: var(--couleur-fond);
-  }
-  
-  /* Style pour les titres à l'intérieur des éléments .periode_ */
-  [class^="periode_"] h1,
-  [class^="periode_"] h2,
-  [class^="periode_"] h3 {
+}
+
+/* Style pour les titres à l'intérieur des éléments .periode_ */
+[class^="periode_"] h1,
+[class^="periode_"] h2,
+[class^="periode_"] h3 {
     color: var(--couleur-bouton);
     margin-top: 0;
     padding-top: 0;
-  }
+}
 
 .entree {
     display: grid;
@@ -606,6 +624,34 @@ footer p {
     border-radius: 3px;
     box-sizing: border-box;
     /* Inclut padding et bordures dans le calcul de la largeur */
+}
+
+.totalDurationDisplay {
+    font-weight: bold;
+    font-size: var(--taille-texte-normale);
+    font-family: var(--police-principale);
+    background-color: var(--couleur-fond-onglet);
+    /* Fond léger pour contraster avec le contenu */
+    color: var(--couleur-texte);
+    /* Couleur de texte standard */
+    padding: var(--espace-petit);
+    /* Padding pour donner de l'espace autour du texte */
+    margin-top: var(--espace-petit);
+    /* Marge supérieure pour séparer des autres éléments */
+    border-radius: var(--bordure-radius);
+    /* Coins arrondis */
+    box-shadow: var(--ombre-box);
+    /* Ombre subtile pour un effet de profondeur */
+    text-align: right;
+    /* Centrage du texte */
+    display: inline-block;
+    /* S'assurer que la div ne prend pas toute la largeur */
+    width: 95%;
+    /* Largeur maximale pour éviter d'être trop étendu */
+    margin-left: auto;
+    /* Centrage horizontal */
+    margin-right: auto;
+    /* Centrage horizontal */
 }
 
 .btnSuppression,
@@ -643,8 +689,6 @@ footer p {
     background-color: #45a049;
     /* vert plus foncé au survol */
 }
-
-
 
 .titleSequence {
     display: flex;

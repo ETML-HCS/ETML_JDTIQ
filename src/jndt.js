@@ -164,11 +164,11 @@ function validateJournal () {
     parseInt(document.getElementById('precision').value),
     projectType,
     8, // defaultSequences
-    baseDuration,
-    defaultTasks
+    baseDuration
   )
 
   activateTab(onglets.PLANIFICATION)
+  dataJournal.id = generateUniqueId(dataJournal.author)
 
   showAlert(
     'Tous les champs obligatoires sont correctement remplis.',
@@ -186,7 +186,8 @@ function createJournal (
   timePrecision,
   projectType,
   defaultSequences,
-  baseDuration
+  baseDuration,
+  jWork = []
 ) {
   // Initialize the dataJournal object with additional configuration
   dataJournal = {
@@ -196,7 +197,7 @@ function createJournal (
     firstSeq: firstDate,
     journalEntries: [], // Array to store journal entries
     planningEntries: [], // Array to store planning entries
-    joursSelectionnes: [],
+    joursSelectionnes: jWork,
     config: {
       timePrecision: timePrecision, // Time precision (3, 6, 9 lines per hour)
       projectType: projectType, // Project type (short, medium, long, TPI)
@@ -227,27 +228,24 @@ function createJournal (
       break
   }
 
+  // Exécuter si joursSelectionnes est null, non défini, ou vide
   // Collecte des jours sélectionnés
   var checkboxes = document.querySelectorAll(
     '#frequenceParSemaine input[type=checkbox]:checked'
   )
-  for (var checkbox of checkboxes) {
-    dataJournal.joursSelectionnes.push(checkbox.value)
+
+  if (dataJournal.config.projectType === 'tpi') {
+    dataJournal.joursSelectionnes = [1, 2, 3, 4, 5]
+  } else if (
+    !dataJournal.joursSelectionnes ||
+    dataJournal.joursSelectionnes.length === 0
+  ) {
+    for (var checkbox of checkboxes) {
+      dataJournal.joursSelectionnes.push(checkbox.value)
+    }
   }
 
-  console.log(dataJournal)
   return dataJournal
-}
-
-function createJournalEntry (duration, task, description, ref, status, tag) {
-  return {
-    duration: duration, // Durée de l'activité
-    task: task, // Nom de la tâche
-    description: description, // Description et réflexion
-    ref: ref, // Référence ou source
-    status: status, // Statut de l'activité
-    tag: tag // Tag (optionnel)
-  }
 }
 
 function addJournalEntry (entry) {
@@ -277,6 +275,10 @@ function openTab (event, tabName) {
 
   // Sélectionner l'élément de message dans l'onglet actuel
   var messageElement = document.getElementById('message' + tabName)
+
+  if (tabName === onglets.JOURNAUX) {
+    displayJournalsFromLocalStorage()
+  }
 
   // Vérifiez si un journal est ouvert ou créé et mettez à jour le message
   if (isJournalCreated()) {
@@ -378,9 +380,101 @@ function adjustForHolidays (holidayDates) {
   // Implementation
 }
 
-// Saves journal data locally using localStorage
-function saveLocally (journalData) {
-  // Implementation
+function generateUniqueId (authorName) {
+  // Prendre les 6 derniers chiffres de l'horodatage actuel
+  const timestamp = Date.now().toString()
+  const lastSixDigits = timestamp.substring(timestamp.length - 6)
+
+  // Nettoyer le nom de l'auteur pour le rendre adapté à une clé (retirer les espaces, caractères spéciaux, etc.)
+  const cleanAuthorName = authorName.replace(/[^a-zA-Z0-9]/g, '')
+
+  // Combinaison des deux pour l'ID
+  return `${lastSixDigits}_${cleanAuthorName}`
+}
+
+function displayJournalsFromLocalStorage () {
+  const keys = Object.keys(localStorage)
+  const journalPrefix = 'dataJournal_'
+  const journalsContainer = document.getElementById('journalGridSection')
+
+  // Vider le conteneur existant
+  journalsContainer.innerHTML = ''
+
+  keys.forEach(key => {
+    if (key.startsWith(journalPrefix)) {
+      const journalData = JSON.parse(localStorage.getItem(key))
+
+      // Créer un élément pour le journal
+      const journalDiv = document.createElement('div')
+      journalDiv.className = 'journal-entry'
+      journalDiv.style.cursor = 'pointer' // Style pour montrer que l'élément est cliquable
+
+      // Ajouter un écouteur d'événements pour le clic
+      journalDiv.addEventListener('click', () => {
+        loadSave(journalData) // Remplacer 'loadSave' par le nom de votre fonction de chargement
+      })
+
+      // Ajouter l'icône ou l'image du journal
+      const journalIcon = document.createElement('img')
+      journalIcon.src = 'src/img/Journaux.png'
+      journalIcon.alt = 'Icône de journal'
+      journalIcon.className = 'journal-icon'
+
+      // Ajouter le titre du journal
+      const journalTitle = document.createElement('h3')
+      const titleText = journalData.title
+        ? journalData.title + ' - ' + journalData.responsible
+        : 'Journal sans titre'
+      const dateString = journalData.firstSeq
+        ? new Date(journalData.firstSeq).toLocaleDateString()
+        : 'pas de date'
+      journalTitle.innerHTML = `${titleText}<br>${dateString}`
+
+      // Assembler l'élément du journal
+      journalDiv.appendChild(journalIcon)
+      journalDiv.appendChild(journalTitle)
+
+      // Ajouter l'élément du journal au conteneur
+      journalsContainer.appendChild(journalDiv)
+    }
+  })
+}
+
+function saveJournalLocally () {
+  if (!dataJournal || !dataJournal.id) {
+    console.warn(
+      'Données du journal ou identifiant manquant pour la sauvegarde locale.'
+    )
+    return
+  }
+
+  try {
+    const dataToSave = JSON.stringify(dataJournal)
+    const journalKey = `dataJournal_${dataJournal.id}`
+    localStorage.setItem(journalKey, dataToSave)
+    console.log(
+      `Journal ${dataJournal.id} sauvegardé localement sous la clé ${journalKey}.`
+    )
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du journal : ', error)
+  }
+}
+
+function loadJournalLocally (journalId) {
+  const journalKey = `dataJournal_${journalId}`
+  try {
+    const data = localStorage.getItem(journalKey)
+    if (data) {
+      console.log(`Journal ${journalId} chargé depuis la clé ${journalKey}.`)
+      return JSON.parse(data)
+    } else {
+      console.warn(`Aucun journal trouvé avec l'identifiant ${journalId}.`)
+      return null
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement du journal : ', error)
+    return null
+  }
 }
 
 // Exports journal data to a database
@@ -425,7 +519,7 @@ function ajouterNouvelleSequence (onglet) {
   var typeProjet = dataJournal.config.projectType // 'court', 'moyen', 'long', ou 'tpi'
   var precision = dataJournal.config.timePrecision // 3, 6, ou 9 lignes par heure
   var dureeProjet =
-    typeProjet === 'tpi' ? 0.75 : dataJournal.config.projectDuration / 8
+    typeProjet === 'tpi' ? 7 : dataJournal.config.projectDuration / 8
 
   // Récupérer les jours sélectionnés depuis les checkbox
   var frequence = dataJournal.joursSelectionnes || []
@@ -441,24 +535,8 @@ function ajouterNouvelleSequence (onglet) {
   sequenceDiv = creerDivSequence(onglet)
 
   // affiche l'entete des entrées
-  let entreesHeader = document.getElementById('entreesHeader');
-  entreesHeader.style.cssText = `
-      display: grid;
-      grid-template-columns: 7ch 18ch auto 20ch 12ch 5ch 2ch 2ch;
-      gap: 3px;
-      position: fixed;
-      top: 264px; /* Positionne l'en-tête à 266px du haut */
-      background: white;
-      padding-left: 80px; /* Ajouter du padding à l'intérieur de l'en-tête */
-      padding-right:80px;
-      box-shadow: 0px 2px 4px rgba(0,0,0,0.1); /* Optionnel, pour une meilleure visibilité */
-      left: 0;
-      right: 0;
-      box-sizing: border-box; /* Inclut padding et border dans la largeur */
-      font-size: 1.1em;
-  `;
+  // addEntriesHeader()
 
-  
   // Pour chaque jour
   for (let i = 0; i < nombreJours; i++) {
     let jour = frequence[i]
@@ -474,6 +552,104 @@ function ajouterNouvelleSequence (onglet) {
   // sequenceDiv.appendChild(btnAjouterEntree);
 
   parentElement.prepend(sequenceDiv)
+}
+
+function creerDivCheckTimes(periodeDiv) {
+  // Crée une nouvelle div pour afficher la durée
+  const checkTimesDiv = document.createElement('div');
+  checkTimesDiv.className = 'totalDurationDisplay';
+
+  // Définit le contenu HTML de la div avec le temps maximum
+  const maxDuration = dataJournal.config.baseDuration;
+  checkTimesDiv.innerHTML = "Total : <span class='totalDuration'>0</span> / Max : <span class='objectifTime'>" + maxDuration + "</span>";
+
+  // Met à jour la durée totale en fonction des changements dans periodeDiv
+  updateCheckTimesForThisDiv(periodeDiv, checkTimesDiv);
+
+  return checkTimesDiv;
+}
+
+
+
+function updateCheckTimesForThisDiv (periodeDiv, checkTimesDiv) {
+  if (!periodeDiv) {
+    console.error('Période introuvable.')
+    return
+  }
+
+  const updateTotalDuration = () => {
+    let totalDuration = 0
+
+    // Trouve tous les éléments de classe 'entree' dans periodeDiv
+    const entrees = periodeDiv.getElementsByClassName('entree')
+    Array.from(entrees).forEach(entree => {
+      const inputDuration = entree.querySelector('input[name="duration"]')
+      if (
+        inputDuration &&
+        inputDuration.value !== '' &&
+        !isNaN(inputDuration.value)
+      ) {
+        totalDuration += parseFloat(inputDuration.value)
+      }
+    })
+
+    // Vérifie le total par rapport au temps maximum
+    const maxDuration = dataJournal.config.baseDuration
+    let displayColor
+
+    if (totalDuration === maxDuration) {
+      // Vert si parfait
+      displayColor = 'var(--couleur-principale)'
+    } else if (totalDuration > maxDuration) {
+      // Rouge en cas de dépassement
+      displayColor = 'red'
+    } else {
+      // Couleur standard pour les autres cas
+      displayColor = 'var(--couleur-texte)'
+    }
+
+    // Met à jour le contenu de checkTimesDiv
+    if (checkTimesDiv) {
+      const totalDisplay = checkTimesDiv.querySelector('.totalDuration')
+      if (totalDisplay) {
+        totalDisplay.textContent = totalDuration
+        totalDisplay.style.color = displayColor
+      }
+    }
+
+    // Affichage console pour le débogage
+    console.log('Total duration:', totalDuration)
+  }
+
+  // Attache les écouteurs d'événements aux inputs 'duration'
+  const entrees = periodeDiv.getElementsByClassName('entree')
+  Array.from(entrees).forEach(entree => {
+    const inputDuration = entree.querySelector('input[name="duration"]')
+    if (inputDuration) {
+      inputDuration.addEventListener('input', updateTotalDuration)
+    }
+  })
+
+  updateTotalDuration() // Initialisation du total
+}
+
+function addEntriesHeader () {
+  let entreesHeader = document.getElementById('entreesHeader')
+  entreesHeader.style.cssText = `
+      display: grid;
+      grid-template-columns: 7ch 18ch auto 20ch 12ch 5ch 2ch 2ch;
+      gap: 3px;
+      position: fixed;
+      top: 264px; /* Positionne l'en-tête à 266px du haut */
+      background: white;
+      padding-left: 80px; /* Ajouter du padding à l'intérieur de l'en-tête */
+      padding-right:80px;
+      box-shadow: 0px 2px 4px rgba(0,0,0,0.1); /* Optionnel, pour une meilleure visibilité */
+      left: 0;
+      right: 0;
+      box-sizing: border-box; /* Inclut padding et border dans la largeur */
+      font-size: 1.1em;
+  `
 }
 
 // fonctions pour ajouter une nouvelle séquence
@@ -540,6 +716,8 @@ function creerDivPeriode (periode, precision, onglet) {
   for (let e = 0; e < precision; e++) {
     periodesDiv.appendChild(creerDivEntree(onglet))
   }
+
+  periodesDiv.appendChild(creerDivCheckTimes(periodesDiv))
 
   return periodesDiv
 }
@@ -693,65 +871,122 @@ function isVacances (date) {
   )
 }
 
-function saveEntries(onglet) {
-  let containerId, targetArray;
+function saveEntries (onglet) {
+  let containerId, targetArray
 
   if (onglet === onglets.JOURNAL) {
-    containerId = 'parentSequenceJournal';
-    targetArray = dataJournal.journalEntries;
+    containerId = 'parentSequenceJournal'
+    targetArray = dataJournal.journalEntries
   } else if (onglet === onglets.PLANIFICATION) {
-    containerId = 'parentSequencePlannification';
-    targetArray = dataJournal.planningEntries;
+    containerId = 'parentSequencePlannification'
+    targetArray = dataJournal.planningEntries
   }
 
-  saveEntriesForContainer(containerId, targetArray);
+  saveEntriesForContainer(containerId, targetArray)
+  saveJournalLocally()
 }
 
-function saveEntriesForContainer(containerId, targetArray) {
-  const container = document.getElementById(containerId);
+// attention supprimer les entrées malades ...
+function saveEntriesForContainer (containerId, targetArray) {
+  const container = document.getElementById(containerId)
   if (!container) {
-    showAlert(`Le conteneur ${containerId} n'existe pas.`, 'error');
-    return;
+    showAlert(`Le conteneur ${containerId} n'existe pas.`, 'error')
+    return
   }
 
   // Sélection des divs de séquence qui ont une classe commençant par 'sequence_'
-  const sequenceDivs = container.querySelectorAll("[class^='sequence_']");
-  const entries = [];
+  const sequenceDivs = container.querySelectorAll("[class^='sequence_']")
+  const entries = []
 
   sequenceDivs.forEach(sequenceDiv => {
-    const sequenceNumber = sequenceDiv.className.match(/sequence_(\d+)/)[1]; // Récupération du numéro de la séquence
+    const sequenceNumber = sequenceDiv.className.match(/sequence_(\d+)/)[1] // Récupération du numéro de la séquence
 
     // Sélection des divs de jour qui ont un ID au format 'jour_1', 'jour_2', etc.
-    const jourDivs = sequenceDiv.querySelectorAll("[id^='jour_']");
+    const jourDivs = sequenceDiv.querySelectorAll("[id^='jour_']")
 
     jourDivs.forEach(jourDiv => {
-      const jourNumber = jourDiv.id.match(/jour_(\d+)/)[1]; // Récupération du numéro du jour à partir de l'ID
-      const entreeDivs = jourDiv.querySelectorAll('.entree');
+      const jourNumber = jourDiv.id.match(/jour_(\d+)/)[1] // Récupération du numéro du jour à partir de l'ID
+      const entreeDivs = jourDiv.querySelectorAll('.entree')
 
       entreeDivs.forEach(div => {
-        const description = div.querySelector('.input-description').value;
-        const reference = div.querySelector('.input-ref').value;
-        
+        const description = div.querySelector('.input-description').value
+        const reference = div.querySelector('.input-ref').value
+
         // Vérifiez si les champs description et ref sont remplis
         if (description.trim() !== '' && reference.trim() !== '') {
-          const duration = div.querySelector('.input-duration').value;
-          const task = div.querySelector('.select-task').value;
-          const status = div.querySelector('.select-status').value;
-          const tag = div.querySelector('.input-tag').value;
+          const duration = div.querySelector('.input-duration').value
+          const task = div.querySelector('.select-task').value
+          const status = div.querySelector('.select-status').value
+          const tag = div.querySelector('.input-tag').value
 
-          entries.push({ sequenceNumber, jourNumber, duration, task, description, reference, status, tag });
+          entries.push({
+            sequenceNumber,
+            jourNumber,
+            duration,
+            task,
+            description,
+            reference,
+            status,
+            tag
+          })
         } else {
-          div.remove();
+          div.remove()
         }
-      });
-    });
-  });
+      })
+    })
+  })
 
-  targetArray.splice(0, targetArray.length, ...entries);
+  targetArray.splice(0, targetArray.length, ...entries)
 }
 
+function updateDOMWithEntries (tabType) {
+  let entries, parentContainerId
 
+  // Exemple d'appel de la fonction
+  //  // updateDOMWithEntries('PLANIFICATION');
 
+  // Déterminer le type d'onglet et définir les entrées et le conteneur parent appropriés
+  if (tabType === 'PLANIFICATION') {
+    entries = dataJournal.planningEntries
+    parentContainerId = 'parentSequencePlannification'
+  } else if (tabType === 'JOURNAL') {
+    entries = dataJournal.journalEntries
+    parentContainerId = 'parentSequenceJournal'
+  } else {
+    console.warn("Type d'onglet non reconnu.")
+    return
+  }
+
+  // Vérifier si les entrées sont valides
+  if (!entries || entries.length === 0) {
+    console.warn(`Aucune entrée trouvée pour ${tabType}.`)
+    return
+  }
+
+  entries.forEach(entry => {
+    // Sélectionner le conteneur pour la séquence et le jour dans le conteneur parent approprié
+    const container = document.querySelector(
+      `#${parentContainerId} .sequence_${entry.sequenceNumber} #jour_${entry.jourNumber}`
+    )
+    if (!container) {
+      console.warn(
+        `Aucun conteneur trouvé pour la séquence ${entry.sequenceNumber} et le jour ${entry.jourNumber} dans ${tabType}.`
+      )
+      return
+    }
+
+    // Mettre à jour les entrées du DOM
+    const domEntry = container.querySelector('.entree')
+    if (domEntry) {
+      domEntry.querySelector('.input-duration').value = entry.duration
+      domEntry.querySelector('.select-task').value = entry.task
+      domEntry.querySelector('.input-description').value = entry.description
+      domEntry.querySelector('.input-ref').value = entry.reference
+      domEntry.querySelector('.select-status').value = entry.status
+      domEntry.querySelector('.input-tag').value = entry.tag
+    }
+  })
+}
 
 function imprimerJournal () {
   // Logique pour imprimer le journal

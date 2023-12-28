@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="src/default.css">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>JTD IQ V2023</title>
+        <title>JTD IQ V2024</title>
     </head>
 
     <body onload="initJndt()">
@@ -35,13 +35,14 @@
         <main>
             <section id="Journaux" class="tabcontent">
                 <h2>Liste des Journaux</h2>
-                <div id="messageJournaux" class="journal-list"> 
+                <div id="journalGridSection"></div>
+
+                <div id="messageJournaux" class="journal-list">
 
                 </div>
             </section>
 
             <section id="NouveauJournal" class="tabcontent">
-
                 <p id="messageNouveauJournal"></p>
                 <div class="form-grid">
                     <fieldset class="journal-info">
@@ -268,24 +269,32 @@
                 <h3>Bilan Graphique</h3>
                 <div id="messageBilanGraphique">
 
-                </div>       
+                </div>
                 <p>Contenu du Bilan Graphique.</p>
             </section>
             <section id="Gantt" class="tabcontent">
                 <h3>Gantt</h3>
                 <div id="messageGantt">
 
-                </div> 
+                </div>
                 <p>Contenu de Gantt.</p>
             </section>
             <section id="Planification" class="tabcontent">
                 <div id="buttonsPlanification">
-                    <button type="button" onclick="ajouterNouvelleSequence(onglets.PLANIFICATION)">Ajouter Séquence</button>
-                    <button type="button" onclick="saveEntries(onglets.PLANIFICATION)">Sauvegarder Planification</button>
-                    <button type="button" onclick="imprimer(onglets.PLANIFICATION)">Imprimer Journal</button>
-                    <button type="button" onclick="exporter(onglets.PLANIFICATION)">Exporter Journal</button>
+                    <button type="button"
+                        onclick="ajouterNouvelleSequence(onglets.PLANIFICATION)">Ajouter
+                        Séquence</button>
+                    <button type="button"
+                        onclick="saveEntries(onglets.PLANIFICATION)">Sauvegarder
+                        Planification</button>
+                    <button type="button"
+                        onclick="imprimer(onglets.PLANIFICATION)">Imprimer
+                        Journal</button>
+                    <button type="button"
+                        onclick="exporter(onglets.PLANIFICATION)">Exporter
+                        Journal</button>
                 </div>
-               
+
                 <div id="messagePlanification"></div>
 
                 <div id="parentSequencePlannification">
@@ -303,12 +312,20 @@
 
             <section id="Journal" class="tabcontent">
                 <div id="buttonsJournal">
-                    <button type="button" onclick="ajouterNouvelleSequence(onglets.JOURNAL)">Ajouter Séquence</button>
-                    <button type="button" onclick="saveEntries(onglets.JOURNAL)">Sauvegarder Journal</button>
-                    <button type="button" onclick="imprimer(onglets.JOURNAL)">Imprimer Journal</button>
-                    <button type="button" onclick="exporter(onglets.JOURNAL)">Exporter Journal</button>
+                    <button type="button"
+                        onclick="ajouterNouvelleSequence(onglets.JOURNAL)">Ajouter
+                        Séquence</button>
+                    <button type="button"
+                        onclick="saveEntries(onglets.JOURNAL)">Sauvegarder
+                        Journal</button>
+                    <button type="button"
+                        onclick="imprimer(onglets.JOURNAL)">Imprimer
+                        Journal</button>
+                    <button type="button"
+                        onclick="exporter(onglets.JOURNAL)">Exporter
+                        Journal</button>
                 </div>
-                
+
                 <div id="messageJournal"></div>
 
                 <div id="parentSequenceJournal"></div>
@@ -316,11 +333,15 @@
             </section>
         </main>
 
+        <div id="alertPopup" class="alert-popup">Message d'alerte</div>
+
+        <footer> <p>ETML/CFPV</p> <p>author: HCS</p> <p>17.12.2023</p> </footer>
+
+        <!-- Balise pour charger le script de débogage -->
+        <script src="src/debug.js"></script>
+
         <!-- Script JS pour gérer les interactions utilisateur -->
         <script src="src/jndt.js"></script>
 
-        <div id="alertPopup" class="alert-popup">Message d'alerte</div>
-
-        <footer> <p>ETML/CFPV</p> <p>author: HCS</p> <p>17.12.2023</p>  </footer>
     </body>
 </html>
