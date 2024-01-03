@@ -1,74 +1,106 @@
 /*
-Développement d'une application pour la gestion des journaux dans une école technique. elle offre :
-1. création de journal avec titre, auteur, responsable.
-2. saisie des activités pour un suivi détaillé.
-3. planification et gestion des tâches.
-4. création de diagrammes de Gantt.
-5. graphiques temporels avec granularité ajustable (3, 6, 12 lignes par heure).
-6. configuration flexible du journal.
-7. gestion de projets de différentes durées (court : 24 périodes, moyen : 32 périodes, long : 40 périodes), ajustable pour jours fériés.
-8. prise en compte des interruptions et vacances.
-9. sauvegarde locale via 'localStorage'.
-10. exportation des données vers une base de données.
+Développement d'une application pour la gestion des temps. Cette application offre les fonctionnalités suivantes :
+
+1. Création de journal avec titre, auteur, responsable.
+2. Saisie des activités pour un suivi détaillé.
+3. Planification et gestion des tâches.
+4. Création de diagrammes de Gantt.
+5. Graphiques temporels avec granularité ajustable (3, 6, 12 lignes par heure).
+6. Configuration flexible du journal.
+7. Gestion de projets de différentes durées (court : 24 périodes, moyen : 32 périodes, long : 40 périodes), 
+   ajustable pour jours fériés.
+8. Prise en compte des interruptions et vacances.
+9. Sauvegarde locale via 'localStorage'.
+10. Exportation des données vers une base de données.
 */
 
 // Déclaration globale
+// sequenceNumber : Ce tableau stocke le nombre de séquences effectives pour deux activités distinctes :
+// [0] représente le nombre de séquences de planification réalisées,
+// [1] indique le nombre d'entrées enregistrées dans le journal de projet.
 let sequenceNumber = [0, 0]
+
+// sequenceCalDate : Ce tableau suit le nombre total de séquences pour les mêmes deux activités,
+// mais en incluant les jours non ouvrables comme les vacances et les absences :
+// [0] compte les jours de planification, y compris les jours non ouvrables,
+// [1] compte les entrées de journal, y compris les jours non ouvrables.
 let sequenceCalDate = [0, 0]
+
+// dataJournal est utilisée pour stocker les données du journal en cours.
+// Elle est initialisée à 'null' et sera assignée avec les données du journal (titre, auteur, activités, etc.)
+// lorsqu'elles seront disponibles.
 let dataJournal = null
+
 let defaultTasks = [
   {
-    id: 'etude',
-    name: 'Etude/Analyse',
+    id: 'analyse',
+    name: 'Analyse',
     category: 'Initiation',
-    description: 'Identifier les besoins et établir une base pour le projet.'
+    description: 'Comprendre les exigences à partir du cahier des charges.'
   },
   {
-    id: 'reunion',
-    name: 'Réunion',
+    id: 'planification',
+    name: 'Planification',
     category: 'Planification',
-    description:
-      'Planifier le projet, définir les objectifs et les ressources nécessaires.'
+    description: 'Préparer les tâches et ressources nécessaires.'
   },
   {
-    id: 'redaction',
-    name: 'Rédaction',
-    category: 'Documentation',
-    description:
-      'Rédaction de documents de planification comme le cahier des charges.'
-  },
-  {
-    id: 'developpement',
-    name: 'Développement',
+    id: 'execution',
+    name: 'Exécution',
     category: 'Exécution',
-    description: 'Exécuter les tâches de développement conformément au plan.'
+    description: 'Réaliser les activités du projet.'
   },
   {
-    id: 'test',
-    name: 'Test',
-    category: 'Contrôle de Qualité',
-    description: 'Tester les fonctionnalités pour assurer la qualité.'
+    id: 'suivi',
+    name: 'Suivi',
+    category: 'Contrôle',
+    description: 'Suivre l’avancement et résoudre les problèmes.'
   },
   {
-    id: 'evaluationCompetences',
-    name: 'Évaluation des Compétences',
-    category: 'Évaluation',
-    description: "Évaluer les compétences et la performance de l'équipe."
+    id: 'qualite',
+    name: 'Qualité',
+    category: 'Contrôle',
+    description: 'Contrôler la qualité des livrables.'
   },
   {
-    id: 'autoFormation',
-    name: 'Autoformation',
-    category: 'Amélioration Continue',
+    id: 'rapport',
+    name: 'Rapport',
+    category: 'Clôture',
+    description: 'Documenter les activités et résultats.'
+  },
+  {
+    id: 'retour',
+    name: 'Retour',
+    category: 'Clôture',
+    description: 'Analyser les succès et difficultés.'
+  },
+  {
+    id: 'preparation-tpi',
+    name: 'Préparation TPI',
+    category: 'Travail avant TPI',
+    description: 'Préparer et planifier le travail avant le TPI.'
+  },
+  {
+    id: 'recherche-tpi',
+    name: 'Recherche pour TPI',
+    category: 'Travail avant TPI',
     description:
-      "Promouvoir l'auto-apprentissage pour améliorer les compétences."
+      'Recherche de ressources et de connaissances nécessaires pour le TPI.'
+  },
+  {
+    id: 'ferie',
+    name: 'Férié/Congé',
+    category: 'RH',
+    description: 'Gestion des jours fériés.'
   },
   {
     id: 'absence',
-    name: 'Absences/Maladie',
-    category: 'Ressources Humaines',
-    description: 'Gérer les absences et les ressources humaines.'
+    name: 'Absence/Maladie',
+    category: 'RH',
+    description: 'Gérer les maladies et absences.'
   }
 ]
+
 // provisoir normalement json ....
 const CVacances = {
   hiver: { debut: new Date('2023-12-23'), fin: new Date('2024-01-07') },
@@ -143,32 +175,30 @@ function validateJournal () {
   }
 
   var projectType = document.getElementById('typeProjet').value
-  var baseDuration
 
-  // Si le type de projet est TPI, fixer la baseDuration à 60 minutes
-  if (projectType === 'tpi') {
-    baseDuration = 60
-    showAlert('Veuillez remplir tous les champs obligatoires.', 'info')
-  } else {
-    // Sinon, déterminer la baseDuration en fonction du type de journal
-    baseDuration =
-      document.getElementById('typeJournal').value === 'heures' ? 60 : 45
-  }
+  var baseDuration =
+    projectType === 'tpi'
+      ? (showAlert('Veuillez remplir tous les champs obligatoires.', 'info'),
+        60)
+      : document.getElementById('typeJournal').value === 'heures'
+      ? 60
+      : 45
 
   // Appel à createJournal
   createJournal(
     document.getElementById('titreJournal').value,
     document.getElementById('auteur').value,
     document.getElementById('responsable').value,
+    document.getElementById('classe').value,
     document.getElementById('dateDebut').value,
     parseInt(document.getElementById('precision').value),
     projectType,
-    8, // defaultSequences
+    8, // defaultSequences,
     baseDuration
   )
 
   activateTab(onglets.PLANIFICATION)
-  dataJournal.id = generateUniqueId(dataJournal.author)
+  dataJournal.journal.id = generateUniqueId(dataJournal.user.pseudo)
 
   showAlert(
     'Tous les champs obligatoires sont correctement remplis.',
@@ -177,75 +207,81 @@ function validateJournal () {
   return true
 }
 
-// Creates a new journal and returns an object containing journal information
+function configureDataJournal (d) {
+  // Vérification de la validité de l'objet dJournal
+  if (!d || !d.journal.config) {
+    throw new Error('Objet dJournal invalide')
+  }
+
+  // Déstructuration pour une meilleure lisibilité
+  const {
+    config: { projectType },
+    workOfDays
+  } = d.journal
+
+  // Durées de projet définies
+  const PROJECT_DURATIONS = { court: 24, moyen: 32, long: 40, tpi: 80 }
+
+  // Configuration de la durée du projet
+  d.journal.config.projectDuration = PROJECT_DURATIONS[projectType] || 0
+  d.journal.config.preparatoryWork = projectType === 'tpi' ? 5 : 0
+
+  // Configuration de workOfDays
+  if (projectType === 'tpi') {
+    d.journal.workOfDays = [1, 2, 3, 4, 5]
+  } else if (!workOfDays || workOfDays.length === 0) {
+    let checkboxes = document.querySelectorAll(
+      '#frequenceParSemaine input[type=checkbox]:checked'
+    )
+    d.journal.workOfDays = Array.from(checkboxes, checkbox =>
+      parseInt(checkbox.value, 10)
+    )
+  }
+
+  return d
+}
+
 function createJournal (
   title,
   author,
-  responsible,
+  boss,
+  ClassGroup,
   firstDate,
   timePrecision,
   projectType,
   defaultSequences,
   baseDuration,
+  id = null,
   jWork = []
 ) {
-  // Initialize the dataJournal object with additional configuration
-  dataJournal = {
-    title: title, // The title of the journal
-    author: author, // The author of the journal
-    responsible: responsible, // The person responsible for the journal
-    firstSeq: firstDate,
-    journalEntries: [], // Array to store journal entries
-    planningEntries: [], // Array to store planning entries
-    joursSelectionnes: jWork,
-    config: {
-      timePrecision: timePrecision, // Time precision (3, 6, 9 lines per hour)
-      projectType: projectType, // Project type (short, medium, long, TPI)
-      defaultSequences: defaultSequences || 8, // Default number of sequences, default is 8
-      baseDuration: baseDuration // Base duration (60 or 45 minutes)
+  // Assurez-vous que firstSeq est défini comme un tableau vide si non fourni
+  let firstSeq = firstDate ? [firstDate] : []
+
+  let data = {
+    user: {
+      pseudo: author,
+      class: ClassGroup,
+      boss: boss
     },
-    taskList: defaultTasks
+    journal: {
+      id: id,
+      title: title,
+      date: firstSeq,
+      workOfDays: jWork,
+      config: {
+        timePrecision: timePrecision,
+        projectType: projectType,
+        defaultSequences: defaultSequences || 8,
+        baseDuration: baseDuration,
+        taskList: defaultTasks,
+        projectDuration: null
+      }
+    },
+    journalEntries: [],
+    planningEntries: []
   }
 
-  // Setting default values and duration for projectType
-  switch (projectType) {
-    case 'court':
-      dataJournal.config.projectDuration = 24 // Short project duration in periods
-      break
-    case 'moyen':
-      dataJournal.config.projectDuration = 32 // Medium project duration in periods
-      break
-    case 'long':
-      dataJournal.config.projectDuration = 40 // Long project duration in periods
-      break
-    case 'tpi':
-      // Define the duration for TPI project type
-      dataJournal.config.projectDuration = 80 // TPI project duration in hours
-      dataJournal.config.preparatoryWork = 5 // Preparatory work allowed, in days
-      break
-    default:
-      // Handle unknown project type if necessary
-      break
-  }
-
-  // Exécuter si joursSelectionnes est null, non défini, ou vide
-  // Collecte des jours sélectionnés
-  var checkboxes = document.querySelectorAll(
-    '#frequenceParSemaine input[type=checkbox]:checked'
-  )
-
-  if (dataJournal.config.projectType === 'tpi') {
-    dataJournal.joursSelectionnes = [1, 2, 3, 4, 5]
-  } else if (
-    !dataJournal.joursSelectionnes ||
-    dataJournal.joursSelectionnes.length === 0
-  ) {
-    for (var checkbox of checkboxes) {
-      dataJournal.joursSelectionnes.push(checkbox.value)
-    }
-  }
-
-  return dataJournal
+  dataJournal = configureDataJournal(data)
 }
 
 function addJournalEntry (entry) {
@@ -282,8 +318,7 @@ function openTab (event, tabName) {
 
   // Vérifiez si un journal est ouvert ou créé et mettez à jour le message
   if (isJournalCreated()) {
-    messageElement.textContent =
-      'Un journal est actuellement ouvert ou a été créé.'
+    messageElement.textContent = ''
   } else {
     messageElement.textContent =
       "Aucun journal n'est actuellement ouvert ou créé."
@@ -345,41 +380,6 @@ function updateTaskTable () {
   })
 }
 
-// Adds an activity to the journal
-function recordActivity (activityDescription, date, duration) {
-  // Implementation
-}
-
-// Schedules a task with start and end dates
-function scheduleTask (taskName, startDate, endDate) {
-  // Implementation
-}
-
-// Generates a Gantt chart from the list of tasks
-function generateGanttChart (tasksList) {
-  // Implementation
-}
-
-// Creates a time-based graph for tasks
-function createTimeGraph (tasksList, timeGranularity) {
-  // Implementation
-}
-
-// Sets up journal configurations
-function configureJournal (title, author, responsible, timeSettings) {
-  // Implementation
-}
-
-// Manages and tracks projects based on their duration
-function manageProject (projectType, duration, sequences) {
-  // Implementation
-}
-
-// Adjusts the planning for holidays and vacation days
-function adjustForHolidays (holidayDates) {
-  // Implementation
-}
-
 function generateUniqueId (authorName) {
   // Prendre les 6 derniers chiffres de l'horodatage actuel
   const timestamp = Date.now().toString()
@@ -409,9 +409,14 @@ function displayJournalsFromLocalStorage () {
       journalDiv.className = 'journal-entry'
       journalDiv.style.cursor = 'pointer' // Style pour montrer que l'élément est cliquable
 
+      // Supprimer le préfixe de la clé et l'ajouter comme une propriété data-save-key
+      const keyWithoutPrefix = key.substring(journalPrefix.length)
+      journalDiv.setAttribute('data-save-key', keyWithoutPrefix)
+
       // Ajouter un écouteur d'événements pour le clic
       journalDiv.addEventListener('click', () => {
-        loadSave(journalData) // Remplacer 'loadSave' par le nom de votre fonction de chargement
+        const saveKey = journalDiv.getAttribute('data-save-key')
+        loadJournalByKey(saveKey) // Charger le journal en utilisant la clé de sauvegarde
       })
 
       // Ajouter l'icône ou l'image du journal
@@ -441,7 +446,7 @@ function displayJournalsFromLocalStorage () {
 }
 
 function saveJournalLocally () {
-  if (!dataJournal || !dataJournal.id) {
+  if (!dataJournal || !dataJournal.journal.id) {
     console.warn(
       'Données du journal ou identifiant manquant pour la sauvegarde locale.'
     )
@@ -450,23 +455,25 @@ function saveJournalLocally () {
 
   try {
     const dataToSave = JSON.stringify(dataJournal)
-    const journalKey = `dataJournal_${dataJournal.id}`
+    const journalKey = `dataJournal_${dataJournal.journal.id}`
     localStorage.setItem(journalKey, dataToSave)
-    console.log(
-      `Journal ${dataJournal.id} sauvegardé localement sous la clé ${journalKey}.`
+    showAlert(
+      `Journal ${dataJournal.journal.id} sauvegardé localement sous la clé ${journalKey}.`,
+      'info'
     )
   } catch (error) {
     console.error('Erreur lors de la sauvegarde du journal : ', error)
   }
 }
 
-function loadJournalLocally (journalId) {
+function loadJournalByKey (journalId) {
   const journalKey = `dataJournal_${journalId}`
   try {
     const data = localStorage.getItem(journalKey)
     if (data) {
       console.log(`Journal ${journalId} chargé depuis la clé ${journalKey}.`)
-      return JSON.parse(data)
+      loadJournalDataToDom(JSON.parse(data))
+      return
     } else {
       console.warn(`Aucun journal trouvé avec l'identifiant ${journalId}.`)
       return null
@@ -477,9 +484,137 @@ function loadJournalLocally (journalId) {
   }
 }
 
-// Exports journal data to a database
-function exportToDatabase (journalData, dbConnectionInfo) {
-  // Implementation
+function loadJournalDataToDom (data) {
+  if (!data) {
+    console.error('Données de journal non valides')
+    return
+  }
+
+  // Fonction pour obtenir le plus grand numéro de séquence
+  const getPlusGrandeSequenceNumber = entries =>
+    entries.reduce(
+      (max, entree) =>
+        Math.max(max, parseInt(entree.entreeId.split('-')[0], 10)),
+      0
+    )
+
+  const plusGrandeSequenceNumberP = getPlusGrandeSequenceNumber(
+    data.planningEntries
+  )
+  const plusGrandeSequenceNumberJ = getPlusGrandeSequenceNumber(
+    data.journalEntries
+  )
+
+  dataJournal = configureDataJournal(data)
+  dataJournal.planningEntries = data.planningEntries
+  dataJournal.journalEntries = data.journalEntries
+
+  // Fonction pour activer l'onglet et ajouter des séquences
+  const processEntries = (entries, onglet, plusGrandeSequenceNumber) => {
+    if (entries.length > 0) {
+      activateTab(onglet)
+      for (let index = 0; index < plusGrandeSequenceNumber; index++) {
+        ajouterNouvelleSequence(onglet)
+      }
+      injectToEntries(entries, onglet)
+    }
+  }
+
+  processEntries(
+    dataJournal.planningEntries,
+    onglets.PLANIFICATION,
+    plusGrandeSequenceNumberP
+  )
+  processEntries(
+    dataJournal.journalEntries,
+    onglets.JOURNAL,
+    plusGrandeSequenceNumberJ
+  )
+}
+
+function injectToEntries (entries, onglet) {
+  let parent = null
+
+  switch (onglet) {
+    case onglets.PLANIFICATION:
+      parent = document.getElementById('parentSequencePlannification')
+      break
+    case onglets.JOURNAL:
+      parent = document.getElementById('parentSequenceJournal')
+      break
+  }
+
+  entries.forEach(entry => {
+    // Utiliser un sélecteur d'attributs pour contourner la limitation des ID commençant par un chiffre
+    const entryElement = parent.querySelector(`[id="${entry.entreeId}"]`)
+    if (!entryElement) {
+      console.error(
+        `Élément non trouvé pour l'entreeId ${entry.entreeId} dans l'onglet ${onglet}`
+      )
+      return
+    }
+
+    // Mettre à jour les informations de l'entrée
+    updateEntryInformation(entryElement, entry)
+  })
+  // Appeler cette fonction après avoir chargé ou mis à jour les entrées dans le DOM
+  updateTotalDurationForEachPeriode()
+}
+
+function updateEntryInformation (entryElement, entryData) {
+  // Mettre à jour le champ 'duration'
+  const durationInput = entryElement.querySelector('.input-duration')
+  if (durationInput) durationInput.value = entryData.duration
+
+  // Mettre à jour le champ 'task'
+  const taskSelect = entryElement.querySelector('.select-task')
+  if (taskSelect) taskSelect.value = entryData.task
+
+  // Mettre à jour le champ 'description'
+  const descriptionInput = entryElement.querySelector('.input-description')
+  if (descriptionInput) descriptionInput.value = entryData.description
+
+  // Mettre à jour le champ 'reference'
+  const referenceInput = entryElement.querySelector('.input-ref')
+  if (referenceInput) referenceInput.value = entryData.reference
+
+  // Mettre à jour le champ 'status'
+  const statusSelect = entryElement.querySelector('.select-status')
+  if (statusSelect) statusSelect.value = entryData.status
+
+  // Mettre à jour le champ 'tag'
+  const tagInput = entryElement.querySelector('.input-tag')
+  if (tagInput) tagInput.value = entryData.tag
+}
+
+function updateTotalDurationForEachPeriode () {
+  // Sélectionne toutes les divs avec une classe commençant par 'periode_'
+  const periodeDivs = document.querySelectorAll('[class^="periode_"]')
+  periodeDivs.forEach(periodeDiv => {
+    let totalDuration = 0
+    const entrees = periodeDiv.getElementsByClassName('entree')
+
+    Array.from(entrees).forEach(entree => {
+      const inputDuration = entree.querySelector('input[name="duration"]')
+      if (
+        inputDuration &&
+        inputDuration.value !== '' &&
+        !isNaN(inputDuration.value)
+      ) {
+        totalDuration += parseFloat(inputDuration.value)
+      }
+    })
+
+    // Mettre à jour le total
+    const totalDisplay = periodeDiv.querySelector('.totalDuration')
+    const maxDurationDisplay = periodeDiv.querySelector('.objectifTime')
+    if (totalDisplay && maxDurationDisplay) {
+      const maxDuration = parseFloat(maxDurationDisplay.textContent)
+      totalDisplay.textContent = totalDuration
+      totalDisplay.style.color =
+        totalDuration > maxDuration ? 'red' : 'var(--couleur-texte)'
+    }
+  })
 }
 
 function createInputField (type, name, placeholder, options, className) {
@@ -499,7 +634,7 @@ function createInputField (type, name, placeholder, options, className) {
     field.placeholder = placeholder
     if (type === 'number') {
       field.step = 5
-      field.max = dataJournal.config.baseDuration
+      field.max = dataJournal.journal.config.baseDuration
       field.min = 0
     }
   }
@@ -511,18 +646,18 @@ function createInputField (type, name, placeholder, options, className) {
 }
 
 function ajouterNouvelleSequence (onglet) {
-  if (!dataJournal || !dataJournal.config) {
+  if (!dataJournal || !dataJournal.journal.config) {
     showAlert("dataJournal n'est pas correctement initialisé.", 'error')
     return
   }
 
-  var typeProjet = dataJournal.config.projectType // 'court', 'moyen', 'long', ou 'tpi'
-  var precision = dataJournal.config.timePrecision // 3, 6, ou 9 lignes par heure
+  var typeProjet = dataJournal.journal.config.projectType // 'court', 'moyen', 'long', ou 'tpi'
+  var precision = dataJournal.journal.config.timePrecision // 3, 6, ou 9 lignes par heure
   var dureeProjet =
-    typeProjet === 'tpi' ? 7 : dataJournal.config.projectDuration / 8
+    typeProjet === 'tpi' ? 7 : dataJournal.journal.config.projectDuration / 8
 
   // Récupérer les jours sélectionnés depuis les checkbox
-  var frequence = dataJournal.joursSelectionnes || []
+  var frequence = dataJournal.journal.workOfDays || []
   var nombreJours = frequence.length
 
   let parentElement = getParentElement(onglet)
@@ -540,7 +675,7 @@ function ajouterNouvelleSequence (onglet) {
   // Pour chaque jour
   for (let i = 0; i < nombreJours; i++) {
     let jour = frequence[i]
-    sequenceDiv.appendChild(creerDivJour(jour, dureeProjet, precision))
+    sequenceDiv.appendChild(creerDivJour(jour, dureeProjet, precision, onglet))
   }
 
   // // Ajouter un bouton pour ajouter une nouvelle entrée à la fin de la séquence
@@ -554,22 +689,58 @@ function ajouterNouvelleSequence (onglet) {
   parentElement.prepend(sequenceDiv)
 }
 
-function creerDivCheckTimes(periodeDiv) {
-  // Crée une nouvelle div pour afficher la durée
-  const checkTimesDiv = document.createElement('div');
-  checkTimesDiv.className = 'totalDurationDisplay';
+function updateTotalDurationForSequence (onglet) {
+  // Supposons que toutes les périodes d'une séquence soient contenues dans un conteneur de séquence
+  const sequenceContainers = document.querySelectorAll(
+    '#parentSequencePlannification'
+  ) // Remplacez '.sequence-container' par la classe appropriée
 
-  // Définit le contenu HTML de la div avec le temps maximum
-  const maxDuration = dataJournal.config.baseDuration;
-  checkTimesDiv.innerHTML = "Total : <span class='totalDuration'>0</span> / Max : <span class='objectifTime'>" + maxDuration + "</span>";
+  sequenceContainers.forEach(sequenceContainer => {
+    let totalDurationForSequence = 0
 
-  // Met à jour la durée totale en fonction des changements dans periodeDiv
-  updateCheckTimesForThisDiv(periodeDiv, checkTimesDiv);
+    const periodeDivs = sequenceContainer.querySelectorAll(
+      '[class^="periode_"]'
+    )
+    periodeDivs.forEach(periodeDiv => {
+      const totalDurationDisplay = periodeDiv.querySelector('.totalDuration')
+      if (totalDurationDisplay) {
+        totalDurationForSequence += parseFloat(totalDurationDisplay.textContent)
+      }
+    })
 
-  return checkTimesDiv;
+    // Mettre à jour le div 'titleSequence' avec le total
+    const titleSequenceDiv = sequenceContainer.querySelector('.titleSequence')
+    if (titleSequenceDiv) {
+      // Création d'un élément span pour afficher le total
+      const totalSpan = document.createElement('span')
+      totalSpan.textContent = `Total journal: ${totalDurationForSequence} min`
+      totalSpan.style.display = 'block' // Pour centrer le texte
+      totalSpan.style.textAlign = 'center'
+
+      // Insérer le total dans la div 'titleSequence'
+      titleSequenceDiv.appendChild(totalSpan)
+    }
+  })
 }
 
+function creerDivCheckTimes (periodeDiv, periode) {
+  // Crée une nouvelle div pour afficher la durée
+  const checkTimesDiv = document.createElement('div')
+  checkTimesDiv.className =
+    'totalDurationDisplay totalDurationDisplay_' + (periode % 2)
 
+  // Définit le contenu HTML de la div avec le temps maximum
+  const maxDuration = dataJournal.journal.config.baseDuration
+  checkTimesDiv.innerHTML =
+    "Total : <span class='totalDuration'>0</span> / Max : <span class='objectifTime'>" +
+    maxDuration +
+    '</span>'
+
+  // Met à jour la durée totale en fonction des changements dans periodeDiv
+  updateCheckTimesForThisDiv(periodeDiv, checkTimesDiv)
+
+  return checkTimesDiv
+}
 
 function updateCheckTimesForThisDiv (periodeDiv, checkTimesDiv) {
   if (!periodeDiv) {
@@ -594,7 +765,7 @@ function updateCheckTimesForThisDiv (periodeDiv, checkTimesDiv) {
     })
 
     // Vérifie le total par rapport au temps maximum
-    const maxDuration = dataJournal.config.baseDuration
+    const maxDuration = dataJournal.journal.config.baseDuration
     let displayColor
 
     if (totalDuration === maxDuration) {
@@ -616,9 +787,6 @@ function updateCheckTimesForThisDiv (periodeDiv, checkTimesDiv) {
         totalDisplay.style.color = displayColor
       }
     }
-
-    // Affichage console pour le débogage
-    console.log('Total duration:', totalDuration)
   }
 
   // Attache les écouteurs d'événements aux inputs 'duration'
@@ -657,7 +825,12 @@ function addEntriesHeader () {
 function creerDivSequence (onglet) {
   // Obtenir la prochaine date de la séquence et vérifier les jours fériés/vacances
   let sequenceDiv = document.createElement('div')
-  let resultNextDate = getNextDate(dataJournal.firstSeq, onglet)
+
+  // Ajouter une nouvelle date à dataJournal.dateSeq
+  dataJournal.journal.date.push(
+    getNextDate(dataJournal.journal.date[0], onglet)
+  )
+
   // Créer et ajouter un élément pour afficher les informations de la séquence
   let infoDiv = document.createElement('div')
 
@@ -669,7 +842,9 @@ function creerDivSequence (onglet) {
       'Séquence n° ' +
       sequenceNumber[0] +
       '<div> Date : ' +
-      resultNextDate.date.toLocaleDateString() +
+      dataJournal.journal.date[
+        dataJournal.journal.date.length - 1
+      ].toLocaleDateString() +
       '</div>'
   } else if (onglets.PLANIFICATION == onglet) {
     sequenceCalDate[1]++
@@ -679,7 +854,9 @@ function creerDivSequence (onglet) {
       'Séquence n° ' +
       sequenceNumber[1] +
       '<div> Date : ' +
-      resultNextDate.date.toLocaleDateString() +
+      dataJournal.journal.date[
+        dataJournal.journal.date.length - 1
+      ].toLocaleDateString() +
       '</div>'
   }
 
@@ -688,50 +865,72 @@ function creerDivSequence (onglet) {
   sequenceDiv.appendChild(infoDiv)
 
   // Ajouter la div spéciale pour les jours fériés ou les vacances
-  if (resultNextDate.divSpecial) {
-    sequenceDiv.appendChild(resultNextDate.divSpecial)
+  if (VResult.divSpecial) {
+    sequenceDiv.appendChild(VResult.divSpecial)
   }
 
   return sequenceDiv
 }
 
-function creerDivJour (jour, dureeProjet, precision) {
+function creerDivJour (jour, dureeProjet, precision, onglet) {
   let divJour = document.createElement('div')
   divJour.id = 'jour_' + jour
   divJour.className = 'jour'
 
-  divJour.innerHTML = '<h3>' + CJours[jour] + '</h3>'
+  // Convertir VResult.date en un objet Date s'il ne l'est pas déjà
+  let dateDebut = new Date(VResult.date)
+
+  // Calculer la date pour le jour actuel
+  let dateJour = new Date(dateDebut)
+  dateJour.setDate(dateDebut.getDate() + jour - 1)
+
+  // Formatage de la date
+  let options = { year: 'numeric', month: 'long', day: 'numeric' }
+  let dateFormatee = dateJour.toLocaleDateString('fr-FR', options)
+
+  divJour.innerHTML = '<h3>' + CJours[jour] + ' le ' + dateFormatee + '</h3>'
 
   for (let p = 0; p < dureeProjet; p++) {
-    divJour.appendChild(creerDivPeriode(p, precision))
+    divJour.appendChild(creerDivPeriode(jour, p, precision, onglet))
   }
 
   return divJour
 }
 
-function creerDivPeriode (periode, precision, onglet) {
+function creerDivPeriode (jour, periode, precision, onglet) {
   let periodesDiv = document.createElement('div')
   periodesDiv.className = 'periode_' + periode
 
   for (let e = 0; e < precision; e++) {
-    periodesDiv.appendChild(creerDivEntree(onglet))
+    periodesDiv.appendChild(creerDivEntree(jour, periode, e, onglet))
   }
 
-  periodesDiv.appendChild(creerDivCheckTimes(periodesDiv))
+  periodesDiv.appendChild(creerDivCheckTimes(periodesDiv, periode))
 
   return periodesDiv
 }
 
-function creerDivEntree () {
+function creerDivEntree (jours, periode, ligne, onglet) {
   let entreeDiv = document.createElement('div')
   entreeDiv.className = 'entree'
+  entreeDiv.id = `${
+    sequenceNumber[onglet == onglets.JOURNAL ? 0 : 1]
+  }-${jours}-${periode}-${ligne}`
 
   // Ajout des champs de saisie avec une classe spécifique pour chaque champ
   entreeDiv.appendChild(
     createInputField('number', 'duration', '[min]', null, 'input-duration')
   )
+
+  createInputField()
   entreeDiv.appendChild(
-    createInputField('select', 'task', '', dataJournal.taskList, 'select-task')
+    createInputField(
+      'select',
+      'task',
+      '',
+      dataJournal.journal.config.taskList,
+      'select-task'
+    )
   )
   entreeDiv.appendChild(
     createInputField(
@@ -812,7 +1011,8 @@ function getNextDate (firstDate, onglet) {
   }
 
   VResult.date = nextDate
-  return VResult
+
+  return nextDate
 }
 
 function getVacationName (date) {
@@ -884,9 +1084,11 @@ function saveEntries (onglet) {
 
   saveEntriesForContainer(containerId, targetArray)
   saveJournalLocally()
+
+  // Appeler cette fonction après avoir chargé ou mis à jour les entrées dans le DOM
+  updateTotalDurationForSequence()
 }
 
-// attention supprimer les entrées malades ...
 function saveEntriesForContainer (containerId, targetArray) {
   const container = document.getElementById(containerId)
   if (!container) {
@@ -894,49 +1096,38 @@ function saveEntriesForContainer (containerId, targetArray) {
     return
   }
 
-  // Sélection des divs de séquence qui ont une classe commençant par 'sequence_'
-  const sequenceDivs = container.querySelectorAll("[class^='sequence_']")
+  const entreeDivs = container.querySelectorAll('.entree')
   const entries = []
 
-  sequenceDivs.forEach(sequenceDiv => {
-    const sequenceNumber = sequenceDiv.className.match(/sequence_(\d+)/)[1] // Récupération du numéro de la séquence
+  entreeDivs.forEach(div => {
+    const entreeId = div.id // Utilisation de l'ID de la div d'entrée
+    const task = div.querySelector('.select-task').value
+    const duration = div.querySelector('.input-duration').value
+    const description = div.querySelector('.input-description').value
+    const reference = div.querySelector('.input-ref').value
+    const status = div.querySelector('.select-status').value
+    const tag = div.querySelector('.input-tag').value
 
-    // Sélection des divs de jour qui ont un ID au format 'jour_1', 'jour_2', etc.
-    const jourDivs = sequenceDiv.querySelectorAll("[id^='jour_']")
-
-    jourDivs.forEach(jourDiv => {
-      const jourNumber = jourDiv.id.match(/jour_(\d+)/)[1] // Récupération du numéro du jour à partir de l'ID
-      const entreeDivs = jourDiv.querySelectorAll('.entree')
-
-      entreeDivs.forEach(div => {
-        const description = div.querySelector('.input-description').value
-        const reference = div.querySelector('.input-ref').value
-
-        // Vérifiez si les champs description et ref sont remplis
-        if (description.trim() !== '' && reference.trim() !== '') {
-          const duration = div.querySelector('.input-duration').value
-          const task = div.querySelector('.select-task').value
-          const status = div.querySelector('.select-status').value
-          const tag = div.querySelector('.input-tag').value
-
-          entries.push({
-            sequenceNumber,
-            jourNumber,
-            duration,
-            task,
-            description,
-            reference,
-            status,
-            tag
-          })
-        } else {
-          div.remove()
-        }
+    // Ajouter l'entrée si la tâche n'est pas "Absences/Maladie" ou si les champs description et reference sont remplis
+    if (
+      task !== 'Absences/Maladie' ||
+      description.trim() !== '' ||
+      reference.trim() !== ''
+    ) {
+      entries.push({
+        entreeId,
+        duration,
+        task,
+        description,
+        reference,
+        status,
+        tag
       })
-    })
+    }
   })
 
-  targetArray.splice(0, targetArray.length, ...entries)
+  // Copie les entrées dans le tableau cible
+  targetArray.push(...entries)
 }
 
 function updateDOMWithEntries (tabType) {
@@ -988,12 +1179,130 @@ function updateDOMWithEntries (tabType) {
   })
 }
 
-function imprimerJournal () {
+function imprimer () {
   // Logique pour imprimer le journal
 }
 
-function exporterJournal () {
-  // Logique pour exporter le journal (par exemple, en PDF ou autre format)
+// donnée de connexion en clair (à supprimer pour la version def)
+const dbConnectionInfo = {
+  host: 'mariadb', // Nom du service MariaDB dans docker-compose.yml
+  user: 'root', // Nom d'utilisateur pour la base de données
+  password: 'exemple', // Mot de passe pour l'utilisateur
+  database: 'JournalDB', // Nom de la base de données à utiliser
+  port: 3306 // Port par défaut pour MariaDB
+}
+
+async function exportToDatabase () {
+  const url = 'http://localhost:3000/insert'
+
+  // Fonction pour récupérer l'ID de l'utilisateur depuis le serveur
+  async function getUserId (pseudo) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/get-user-id/${pseudo}`
+      )
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      return data.id
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération de l'ID de l'utilisateur:",
+        error
+      )
+      return null
+    }
+  }
+
+  // Fonction pour envoyer des requêtes POST
+  async function postData (table, data) {
+    let requestBody = {
+      table: table,
+      data: data
+    }
+
+    try {
+      let response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      })
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      let result = await response.json()
+      console.log('Success:', result)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
+  // Fonction pour vérifier l'existence d'un utilisateur et récupérer son ID
+  async function verifyAndGetUserId (pseudo, role) {
+    let userId = await getUserId(pseudo)
+
+    if (userId === null) {
+      // L'utilisateur n'existe pas, donc on l'ajoute
+      await postData('utilisateurs', { pseudo: pseudo, role: role })
+      userId = await getUserId(pseudo) // Récupère le nouvel ID
+    }
+    return userId
+  }
+
+  // Validation des données de base
+  if (!dataJournal || !dataJournal.user || !dataJournal.journal) {
+    console.error('DataJournal manquant ou incomplet')
+    return
+  }
+
+  // Récupération des IDs
+  let auteurId = await verifyAndGetUserId(dataJournal.user.pseudo, 'auteur')
+
+  let responsableId = await verifyAndGetUserId(dataJournal.user.boss,'responsable')
+
+  // Données du journal avec les IDs récupérés
+  let journalData = {
+    id: dataJournal.journal.id,
+    titre: dataJournal.journal.title,
+    auteur_id: auteurId,
+    responsable_id: responsableId
+  }
+
+  await postData('journaux', journalData)
+
+  // Exportation des entrées de journal et de planification
+  for (const entry of dataJournal.journalEntries) {
+    await postData('entrees_journal', {
+      ...entry,
+      journal_id: dataJournal.journal.id
+    })
+  }
+
+  // Exportation des entrées de planification, en ignorant celles sans durée
+  for (const plan of dataJournal.planningEntries) {
+    if (plan.duration === '' || plan.duration == null) {
+      console.log(
+        "Entrée de planification ignorée en raison de l'absence de durée:",
+        plan
+      )
+      continue // Ignore l'entrée actuelle et passe à la suivante
+    }
+
+    try {
+      await postData('planifications', {
+        ...plan,
+        journal_id: dataJournal.journal.id
+      })
+    } catch (error) {
+      console.error(
+        "Erreur lors de la publication de l'entrée de planification:",
+        error
+      )
+    }
+  }
 }
 
 function showAlert (message, type) {

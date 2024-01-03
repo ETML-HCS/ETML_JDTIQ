@@ -5,10 +5,18 @@
         <link rel="stylesheet" href="src/default.css">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>JTD IQ V2024</title>
+        <title>JNDT-V1</title>
     </head>
 
-    <body onload="initJndt()">
+    <body>
+
+        <!-- pour des raisons de performances onload n'est pas bon !!! -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                initJndt();
+            });
+        </script>
+        
         <!-- Titre de la page -->
         <header class="header-titre">
             <h1>Journal de travail</h1>
@@ -43,8 +51,12 @@
             </section>
 
             <section id="NouveauJournal" class="tabcontent">
+
                 <p id="messageNouveauJournal"></p>
-                <div class="form-grid">
+
+                <!-- Info et propriétaire du journal -->
+                <div class="form-grid"> 
+
                     <fieldset class="journal-info">
                         <legend>Informations du Journal</legend>
                         <div class="form-group">
@@ -86,17 +98,30 @@
                     </fieldset>
                 </div>
 
+                <!-- Paramètres (Date de début:/Précision du Temps/Type de projet:/Fréquence par semaine:)  -->
                 <div class="form-grid">
                     <fieldset class="journal-details">
                         <legend>Paramètres</legend>
 
+                        <!-- Date -->
                         <div class="form-group">
-                            <label for="dateDebut">Date de début:</label>
-                            <input type="date" id="dateDebut" name="dateDebut"
-                                required>
+                            <label for="dateDebut">Date de création</label>
+                            <input type="date" id="dateDebut" name="dateDebut" required>
+                            <script>
+                                // Obtenir la date actuelle
+                                let dateActuelle = new Date();
+                            
+                                // Formatter la date au format AAAA-MM-JJ
+                                let dateFormatee = dateActuelle.toISOString().substring(0, 10);
+                            
+                                // Définir la valeur de l'élément input
+                                document.getElementById('dateDebut').value = dateFormatee;
+                            </script>
                         </div>
 
+                        <!-- Précision / typeProjet -->
                         <div class="form-group">
+                            <!-- Précision du temps -->
                             <div class="form-field">
                                 <label for="precision">Précision du
                                     Temps</label>
@@ -111,10 +136,12 @@
                                 </select>
                             </div>
 
+                            <!-- typeProjet -->
                             <div class="form-field">
                                 <label for="typeProjet">Type de projet:</label>
                                 <select name="typeProjet" id="typeProjet"
-                                    class="custom-select">
+                                    class="custom-select"
+                                    onchange="checkAllDays()">
                                     <option value="court">court 24p
                                         (3x8)</option>
                                     <option value="moyen">Moyen 32p
@@ -123,9 +150,35 @@
                                     <option value="tpi">TPI 80h (10
                                         jours)</option>
                                 </select>
+
+                                <script>
+                                    function checkAllDays(){
+                                        const warningMessage = document.getElementById('warningMessage').textContent = " ";
+    
+                                        // Sélectionner l'élément select avec l'id 'typeProjet'
+                                        const selectElement = document.getElementById('typeProjet');
+    
+                                        // Sélectionner tous les éléments de type checkbox dans la div avec l'id 'frequenceParSemaine'
+                                        const checkboxes = document.querySelectorAll('#frequenceParSemaine input[type="checkbox"]');
+                                         
+                                        if (selectElement.value==='tpi') 
+                                            // Itérer sur chaque checkbox et le cocher
+                                            for(var i = 0; i < checkboxes.length-1; i++) {
+                                                checkboxes[i].checked = true;
+                                            }
+                                        else {
+    
+                                            for(var i = 0; i < checkboxes.length; i++) {
+                                                checkboxes[i].checked = false;
+                                            }
+                                        }
+                                    }
+                                </script>
                             </div>
+                          
                         </div>
 
+                        <!-- fréquence par semaine -->
                         <div class="form-group">
                             <label for="frequenceParSemaine">Fréquence par
                                 semaine:</label>
@@ -156,14 +209,60 @@
                                 <input type="checkbox" id="samedi" name="jours"
                                     value="6">
                             </div>
+
+                            <p id="warningMessage"
+                                style="color: red; grid-column: span 2;"></p>
+                            <!-- Pour le message d'avertissement -->
+                                <script>
+                                const selectElement = document.getElementById('typeProjet');
+                                const checkboxes = document.querySelectorAll('#frequenceParSemaine input[type="checkbox"]');
+                                const warningMessage = document.getElementById('warningMessage');
+
+                                // Fonction pour compter le nombre de checkboxes cochés et afficher un message d'avertissement
+                                function updateWarningMessage() {
+                                    let checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                                    let selectedProject = selectElement.value;
+
+                                    switch (selectedProject) {
+                                        case 'court':
+                                        case 'moyen':
+                                            if (checkedCount > 1) {
+                                                warningMessage.textContent = "Attention : Pour un projet 'court' ou 'moyen', sélectionner plus d'un jour n'est pas conseillé.";
+                                            } else {
+                                                warningMessage.textContent = "";
+                                            }
+                                            break;
+                                        case 'long':
+                                            if (checkedCount > 2) {
+                                                warningMessage.textContent = "Attention : Pour un projet 'long', sélectionner plus de deux jours n'est pas conseillé.";
+                                            } else {
+                                                warningMessage.textContent = "";
+                                            }
+                                            break;
+                                        case 'tpi':
+                                            // Pas de restriction spécifique pour 'tpi'
+                                            warningMessage.textContent = "";
+                                            break;
+                                        default:
+                                            warningMessage.textContent = "";
+                                            break;
+                                    }
+                                }
+
+                                // Ajouter un écouteur d'événements sur chaque checkbox
+                                checkboxes.forEach(checkbox => {
+                                    checkbox.addEventListener('change', updateWarningMessage);
+                                });
+                                </script>
                         </div>
-                    </fieldset>
-
-                    <div class="form-group">
-
-                        <fieldset class="custom-task-details">
-                            <legend>Ajouter une Tâche Personnalisée</legend>
+                    </fieldset> 
+                    
+                    <!-- custom task -->
+                    <fieldset class="custom-task-details">
+                        <legend>Ajouter une Tâche Personnalisée</legend>
+                            <!-- name, Catégorie  -->
                             <div class="form-row">
+
                                 <div class="form-field">
                                     <label for="taskName">Nom:</label>
                                     <input type="text" id="taskName"
@@ -179,90 +278,108 @@
                                 </div>
                             </div>
 
+                            <!-- text description -->
                             <div class="form-field">
                                 <label
                                     for="taskDescription">Description:</label>
-                                <textarea id="taskDescription"
+                                <input type="text" id="taskDescription"
                                     name="taskDescription"
-                                    placeholder="Description"></textarea>
+                                    placeholder="Description"></input>
                             </div>
 
+                            <!-- validation custom task -->
                             <button type="button" id="btn-addTask"
                                 class="btn-style"
                                 onclick="callAddCustomTask()">
                                 Ajouter
                             </button>
-                        </fieldset>
-
-                        <script>
-                            function callAddCustomTask() {
-                                var taskName = document.getElementById('taskName').value;
-                                var taskCategory = document.getElementById('taskCategory').value;
-                                var taskDescription = document.getElementById('taskDescription').value;
-                                var taskId = 'custom'; // Génère un ID simplifié
-                        
-                                addCustomTask(taskId, taskName, taskCategory, taskDescription);
-                        
-                                // Réinitialiser les champs
-                                document.getElementById('taskName').value = '';
-                                document.getElementById('taskCategory').value = '';
-                                document.getElementById('taskDescription').value = '';
-                            }
-                        </script>
-
-                        <fieldset class="journal-details">
-                            <legend>Autres</legend>
-                            <div class="form-field">
-                                <label for="typeJournal">Type de journal</label>
-                                <select name="typeJournal" id="typeJournal"
-                                    onchange="updatePrecisionOptions()">
-                                    <option value="periodes">périodes</option>
-                                    <option value="heures">heures</option>
-                                </select>
-
-                                <script>
-                                    function updatePrecisionOptions() {
-                                        var typeJournal = document.getElementById('typeJournal').value;
-                                        var precisionSelect = document.getElementById('precision');
-                                        var options = '';
-                                
-                                        if (typeJournal === 'heures') {
-                                            options = '<option value="12">12 lignes / 5 [min]</option>' +
-                                                    '<option value="6">6 lignes / 10 [min]</option>' +
-                                                    '<option value="3">3 lignes / 20 [min]</option>';
-                                        } else if (typeJournal === 'periodes') {
-                                            options = '<option value="3">9 lignes / 5 [min] </option>' +
-                                                    '<option value="6">6 lignes / 7.5 [min] </option>' +
-                                                    '<option value="9">3 lignes / 15 [min] </option>';
-                                        }                                
-                                        precisionSelect.innerHTML = options;
-                                    }
-                                </script>
-                            </div>
-                            <div class="table-container">
-                                <label>Liste des Tâches: </label>
-                                <table id="taskTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Nom</th>
-                                            <th>Catégorie</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Les lignes du tableau seront ajoutées ici -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </fieldset>
-                    </div>
+                            <script>
+                                function callAddCustomTask() {
+                                    var taskName = document.getElementById('taskName').value;
+                                    var taskCategory = document.getElementById('taskCategory').value;
+                                    var taskDescription = document.getElementById('taskDescription').value;
+                                    var taskId = 'custom'; // Génère un ID simplifié
+                            
+                                    addCustomTask(taskId, taskName, taskCategory, taskDescription);
+                            
+                                    // Réinitialiser les champs
+                                    document.getElementById('taskName').value = '';
+                                    document.getElementById('taskCategory').value = '';
+                                    document.getElementById('taskDescription').value = '';
+                                }
+                            </script>
+                    </fieldset>
                 </div>
+                
+                <fieldset class="journal-details">
+                    <legend>Autres</legend>
+                        <!-- Type de journal -->
+                    <div class="form-field">
+                        <label for="typeJournal">Type de journal</label>
+                        <select name="typeJournal" id="typeJournal"
+                            onchange="updatePrecisionOptions()">
+                                <option value="periodes">périodes</option>
+                                <option value="heures">heures</option>
+                        </select>
+                        <script>
+                            function updatePrecisionOptions() {
+                                var typeJournal = document.getElementById('typeJournal').value;
+                                var precisionSelect = document.getElementById('precision');
+                                var options = '';
+                                
+                                if (typeJournal === 'heures') {
+                                    options = '<option value="12">12 lignes / 5 [min]</option>' +
+                                        '<option value="6">6 lignes / 10 [min]</option>' +
+                                        '<option value="3">3 lignes / 20 [min]</option>';
+                                    } else if (typeJournal === 'periodes') {
+                                    options = '<option value="3">9 lignes / 5 [min] </option>' +
+                                        '<option value="6">6 lignes / 7.5 [min] </option>' +
+                                        '<option value="9">3 lignes / 15 [min] </option>';
+                                    }
+                                    precisionSelect.innerHTML = options;
+                                }
+                        </script>
+                    </div>
+                    <!-- container -->
+                    <div class="table-container">
+                        <label>Liste des Tâches: </label>
+                        <table id="taskTable">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Catégorie</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Les lignes du tableau seront ajoutées ici -->
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+
                 <div class="button-container">
                     <button id="btn-newJournal" class="btn-style"
                         data-button-type="newJournalValided"
                         onclick="validateJournal()">
                         &#10003; Valider
                     </button>
+
+                <script>
+                    window.onload = function() {
+                        // Obtenir la hauteur du footer
+                        var footerHeight = document.querySelector('footer').offsetHeight;
+                    
+                        // Obtenir les éléments avec la classe .button-container
+                        var buttonContainers = document.querySelectorAll('.button-container');
+                    
+                        // Ajuster le padding-bottom pour chaque .button-container
+                        buttonContainers.forEach(function(container) {
+                            container.style.paddingBottom = `calc(var(--taille-texte-grande) + ${footerHeight}px)`;
+                        });
+                    };
+                </script>
                 </div>
+                
             </section>
 
             <section id="BilanGraphique" class="tabcontent">
@@ -286,13 +403,13 @@
                         Séquence</button>
                     <button type="button"
                         onclick="saveEntries(onglets.PLANIFICATION)">Sauvegarder
-                        Planification</button>
+                        </button>
                     <button type="button"
                         onclick="imprimer(onglets.PLANIFICATION)">Imprimer
-                        Journal</button>
+                        </button>
                     <button type="button"
-                        onclick="exporter(onglets.PLANIFICATION)">Exporter
-                        Journal</button>
+                        onclick="exportToDatabase(onglets.PLANIFICATION)">Transmettre
+                        </button>
                 </div>
 
                 <div id="messagePlanification"></div>
@@ -317,13 +434,13 @@
                         Séquence</button>
                     <button type="button"
                         onclick="saveEntries(onglets.JOURNAL)">Sauvegarder
-                        Journal</button>
+                        </button>
                     <button type="button"
                         onclick="imprimer(onglets.JOURNAL)">Imprimer
-                        Journal</button>
+                        </button>
                     <button type="button"
-                        onclick="exporter(onglets.JOURNAL)">Exporter
-                        Journal</button>
+                        onclick="exportToDatabase(onglets.JOURNAL)">Transmettre
+                        </button>
                 </div>
 
                 <div id="messageJournal"></div>
@@ -338,10 +455,10 @@
         <footer> <p>ETML/CFPV</p> <p>author: HCS</p> <p>17.12.2023</p> </footer>
 
         <!-- Balise pour charger le script de débogage -->
-        <script src="src/debug.js"></script>
+        <script src="src/debug.js" ></script>
 
         <!-- Script JS pour gérer les interactions utilisateur -->
-        <script src="src/jndt.js"></script>
+        <script src="src/jndt.js" ></script>
 
     </body>
 </html>

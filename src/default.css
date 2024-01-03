@@ -7,6 +7,9 @@
     --couleur-entreesJournal: #40007b;
     --couleur-entreesPlanif: #003f5b;
 
+    --couleur-fond-pair: var(--couleur-fond);
+    --couleur-fond-impair: var(--couleur-onglet);
+
     /* Typographie */
     --police-principale: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --taille-texte-petit: 10px;
@@ -101,7 +104,6 @@ h1 {
 }
 
 
-
 .tab {
     display: flex;
     gap: var(--espace-petit);
@@ -145,9 +147,8 @@ h1 {
     border-bottom: 2px solid var(--couleur-accent);
 }
 
-
 .tabcontent {
-    padding: var(--espace-moyen);
+    padding-inline: var(--espace-moyen);
     background-color: var(--couleur-fond);
 }
 
@@ -156,9 +157,7 @@ h1 {
     margin-bottom: var(--espace-moyen);
 }
 
-
 /* Page journaux */
-
 #messageJournaux {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -166,18 +165,30 @@ h1 {
     padding: 10px;
 }
 
+#journalGridSection {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
 .journal-entry {
-    border: 1px solid #ccc;
-    padding: 10px;
+    padding: var(--taille-texte-petit);
     text-align: center;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    /* Optionnel: pour un effet de transition doux */
+}
+
+.journal-entry:hover {
+    background-color: var(--couleur-entreesPlanif);
+    /* Changement de fond sur survol */
+    color: var(--couleur-texte-bouton);
+    border-radius: var(--bordure-radius);
 }
 
 .journal-icon {
-    width: 100px;
+    width: 90px;
     height: auto;
-    margin-bottom: 10px;
 }
 
 .journal-list {
@@ -185,7 +196,6 @@ h1 {
     flex-direction: column;
     gap: var(--espace-petit);
 }
-
 
 /* Contenu nouveau journal */
 #NouveauJournal .form-grid {
@@ -211,7 +221,6 @@ h1 {
         /* Une seule colonne sur petits écrans */
     }
 }
-
 
 #NouveauJournal .form-field {
     display: flex;
@@ -304,8 +313,6 @@ h1 {
     position: absolute;
 }
 
-
-
 .custom-select,
 .form-field input[type="date"] {
     padding: var(--espace-petit);
@@ -375,16 +382,23 @@ h1 {
     color: red;
 }
 
+
 .btn-style {
-    padding: var(--espace-petit) var(--espace-moyen);
+    /* Style du bouton */
     background-color: var(--couleur-bouton);
-    /* Utilisez une couleur appropriée de votre choix */
+    /* Couleur de fond */
     color: var(--couleur-texte-bouton);
-    /* Assurez-vous que le texte est lisible */
+    /* Couleur du texte */
     border: none;
     border-radius: var(--bordure-radius);
+    /* Espacement et dimension */
     margin-bottom: 3px;
+    /* Marge du bas */
     margin-right: 5px;
+    /* Marge à droite */
+    padding: var(--espace-petit) var(--espace-moyen);
+
+    /* Autres */
     cursor: pointer;
     transition: background-color var(--transition-standard);
 }
@@ -411,27 +425,29 @@ h1 {
     grid-row: auto;
 }
 
-.btn-style {
-    margin-bottom: var(--espace-petit);
-    /* autres styles pour le bouton */
-}
-
 .button-container {
+    /* Positionnement du Grid */
     grid-column: 1;
-    /* Place le bouton dans la deuxième colonne */
+    /* Place dans la première colonne */
     grid-row: 2;
-    /* Place le bouton dans la troisième ligne */
+    /* Place dans la deuxième ligne */
+
+    /* Propriétés Flexbox pour l'alignement */
     display: flex;
     justify-content: flex-end;
-    /* Aligner à droite */
+    /* Alignement horizontal à droite */
     align-items: flex-start;
-    /* Aligner en bas */
+    /* Alignement vertical en haut */
+    padding-bottom: var(--taille-texte-grande); 
 }
 
+
+
+#buttonsPlanification button,
 #buttonsJournal button {
     background-color: var(--couleur-bouton);
     color: var(--couleur-texte-bouton);
-    padding: var(--espace-petit) var(--espace-moyen);
+    padding: var(--espace-petit) var(--espace-petit);
     margin: var(--espace-petit);
     border: none;
     border-radius: var(--bouton-radius);
@@ -439,13 +455,12 @@ h1 {
     transition: var(--transition-standard);
 }
 
+#buttonsPlanification button:hover,
 #buttonsJournal button:hover {
-    background-color: var(--couleur-bouton);
-    /* Utilise la couleur du bouton */
-    color: var(--couleur-texte);
-    opacity: 0.1;
-    /* Légèrement plus opaque */
+    background-color: var(--couleur-principale);
+    color: var(--couleur-texte-bouton);
 }
+
 
 .alert-popup {
     display: none;
@@ -463,8 +478,6 @@ h1 {
     border-radius: 5px;
     z-index: 1;
 }
-
-
 
 .jour:nth-child(odd) {
     background-color: var(--couleur-onglet);
@@ -590,12 +603,12 @@ footer p {
 
 /* Couleur de fond pour les éléments pairs */
 [class^="periode_"]:nth-child(2n) {
-    background-color: var(--couleur-fond-onglet);
+    background-color: var(--couleur-fond-pair);
 }
 
 /* Couleur de fond pour les éléments impairs */
 [class^="periode_"]:nth-child(2n+1) {
-    background-color: var(--couleur-fond);
+    background-color: var(--couleur-fond-impair);
 }
 
 /* Style pour les titres à l'intérieur des éléments .periode_ */
@@ -626,33 +639,37 @@ footer p {
     /* Inclut padding et bordures dans le calcul de la largeur */
 }
 
+
+.objectifTime {
+    margin-right: 50px;
+}
+
 .totalDurationDisplay {
+    /* Vos styles de base ici */
     font-weight: bold;
     font-size: var(--taille-texte-normale);
     font-family: var(--police-principale);
-    background-color: var(--couleur-fond-onglet);
-    /* Fond léger pour contraster avec le contenu */
     color: var(--couleur-texte);
-    /* Couleur de texte standard */
-    padding: var(--espace-petit);
-    /* Padding pour donner de l'espace autour du texte */
-    margin-top: var(--espace-petit);
-    /* Marge supérieure pour séparer des autres éléments */
     border-radius: var(--bordure-radius);
-    /* Coins arrondis */
     box-shadow: var(--ombre-box);
-    /* Ombre subtile pour un effet de profondeur */
     text-align: right;
-    /* Centrage du texte */
+    padding-block: var(--espace-petit);
     display: inline-block;
-    /* S'assurer que la div ne prend pas toute la largeur */
-    width: 95%;
-    /* Largeur maximale pour éviter d'être trop étendu */
+    width: 100%;
     margin-left: auto;
-    /* Centrage horizontal */
     margin-right: auto;
-    /* Centrage horizontal */
 }
+
+.totalDurationDisplay_0 {
+    background-color: var(--couleur-fond-impair);
+    /* Couleur de fond pour périodes paires */
+}
+
+.totalDurationDisplay_1 {
+    background-color: var(--couleur-fond-pair);
+    /* Couleur de fond pour périodes impaires */
+}
+
 
 .btnSuppression,
 .btnAjouter {

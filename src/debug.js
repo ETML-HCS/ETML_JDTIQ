@@ -15,6 +15,7 @@ function initDebugMode () {
 const configurations = {
   journalStandard: {
     // 1. **Mock-up pour un Journal Standard**
+    id : "145555_DanielLatour",
     title: 'Journal de Projet',
     author: 'Jean Dupont',
     responsible: 'Marie Curie',
@@ -32,6 +33,7 @@ const configurations = {
   },
   journalProjetCourt: {
     // 2. **Mock-up pour un Journal de Projet Court avec Durée de Base Modifiée**
+    id :"214232_DanielLatour",
     title: 'Planification Rapide',
     author: 'Paul Martin',
     responsible: 'Lucas Renaud',
@@ -49,6 +51,7 @@ const configurations = {
   },
   journalTPI: {
     // 3. **Mock-up pour un Journal de Type TPI avec Précision Temporelle Élevée**
+    id :"0111111_DanielLatour",
     title: 'TPI Analyse et Développement',
     author: 'Sophie Leroy',
     responsible: 'Alex Durand',
@@ -81,7 +84,8 @@ function chargerConfigurationDebug (configName) {
       dataJournal.config.timePrecision,
       dataJournal.config.projectType,
       dataJournal.config.defaultSequences,
-      dataJournal.config.baseDuration, 
+      dataJournal.config.baseDuration,
+      dataJournal.id,
       dataJournal.joursSelectionnes
     );
   } else {
