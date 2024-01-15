@@ -404,9 +404,7 @@
                     <button type="button"
                         onclick="saveEntries(onglets.PLANIFICATION)">Sauvegarder
                         </button>
-                    <button type="button"
-                        onclick="imprimer(onglets.PLANIFICATION)">Imprimer
-                        </button>
+                        <button onclick="imprimer('parentSequencePlannification')">Imprimer Planification</button>
                     <button type="button"
                         onclick="exportToDatabase(onglets.PLANIFICATION)">Transmettre
                         </button>
@@ -435,11 +433,10 @@
                     <button type="button"
                         onclick="saveEntries(onglets.JOURNAL)">Sauvegarder
                         </button>
+                    <button onclick="imprimer('parentSequenceJournal')">Imprimer Journal</button>
+                    
                     <button type="button"
-                        onclick="imprimer(onglets.JOURNAL)">Imprimer
-                        </button>
-                    <button type="button"
-                        onclick="exportToDatabase(onglets.JOURNAL)">Transmettre
+                        onclick="exportToDatabase()">Transmettre
                         </button>
                 </div>
 

@@ -1179,21 +1179,144 @@ function updateDOMWithEntries (tabType) {
   })
 }
 
-function imprimer () {
-  // Logique pour imprimer le journal
+function imprimer (elementId, modePaysage = false) {
+  const contenuElement = document.getElementById(elementId)
+  const tempDiv = document.createElement('div')
+
+  // Créer et ajouter l'en-tête du tableau
+  const enTete = `
+    <table>
+      <tr>
+        <th>Durée</th>
+        <th>Tâche</th>
+        <th>Description</th>
+        <th>Source/Référence</th>
+        <th>Status</th>
+        <th>Tag</th>
+      </tr>`
+
+  let tableContent = enTete
+
+  // Parcourir chaque ligne dans le contenu original
+  const lignes = contenuElement.querySelectorAll('.entree')
+  lignes.forEach(ligne => {
+    const inputDescription = ligne.querySelector('input[name="description"]')
+    const inputRef = ligne.querySelector('input[name="ref"]')
+
+    // Vérifier si les champs description et ref sont vides
+    if (
+      (!inputDescription || inputDescription.value.trim() === '') &&
+      (!inputRef || inputRef.value.trim() === '')
+    ) {
+      return // Ignorer cette ligne
+    }
+
+    // Début de la ligne du tableau
+    let tempLigne = '<tr>'
+
+    // Traiter chaque input et select
+    ligne
+      .querySelectorAll('input[type="text"], input[type="number"], select')
+      .forEach(input => {
+        let value =
+          input.type === 'select-one'
+            ? input.options[input.selectedIndex].text
+            : input.value
+
+        // Ajouter "MIN" à la fin si l'input est de type number
+        if (input.type === 'number' && value.trim() !== '') {
+          value += ' [min]'
+        }
+
+        tempLigne += `<td>${value}</td>`
+      })
+
+    // Fin de la ligne du tableau
+    tempLigne += '</tr>'
+
+    // Ajouter la ligne traitée au contenu du tableau
+    tableContent += tempLigne
+  })
+
+  // Fermer le tableau
+  tableContent += '</table>'
+
+  tempDiv.innerHTML = tableContent
+
+  // Ouvrir une nouvelle fenêtre pour l'impression
+  const fenetreImpression = window.open('', '_blank')
+
+  // Styles CSS pour l'impression et la mise en page A4
+  const stylesPourImpression = `
+  <style>
+    @page {
+      size: A4 landscape; /* Forcer le mode paysage */
+      margin: 0;
+    }
+    @media print {
+      body {
+        width: 297mm; /* Largeur de la page A4 en mode paysage */
+        height: 210mm; /* Hauteur de la page A4 en mode paysage */
+        margin: 0;
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        align-content: space-between;
+        font-size: 10pt; /* Ajuster la taille de la police pour économiser de l'espace */
+      }
+      table {
+        width: 96%; /* Ajuster la largeur du tableau */
+        margin-left: auto;
+        margin-right: auto;
+        border-collapse: collapse;
+        page-break-inside: auto; /* Permettre au tableau de s'étendre sur plusieurs pages */
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 5px;
+        text-align: left;
+        max-width: 100px; /* Ajuster en fonction de votre contenu */
+        word-wrap: break-word; /* Permettre la coupure des mots si nécessaire */
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      button, .btnSuppression {
+        display: none !important;
+      }
+    }
+  </style>
+`
+
+  // Ajouter le contenu modifié, les styles et le script à la fenêtre d'impression
+  fenetreImpression.document.write(`
+    <html>
+      <head>
+        <title>Impression</title>
+        ${stylesPourImpression}
+      </head>
+      <body>
+        ${tempDiv.innerHTML}
+      </body>
+    </html>
+  `)
+
+  fenetreImpression.document.close()
+  fenetreImpression.focus()
+
+  // Lancer l'impression et fermer la fenêtre après un court délai
+  fenetreImpression.print()
+  setTimeout(() => fenetreImpression.close(), 5000)
 }
 
-// donnée de connexion en clair (à supprimer pour la version def)
-const dbConnectionInfo = {
-  host: 'mariadb', // Nom du service MariaDB dans docker-compose.yml
-  user: 'root', // Nom d'utilisateur pour la base de données
-  password: 'exemple', // Mot de passe pour l'utilisateur
-  database: 'JournalDB', // Nom de la base de données à utiliser
-  port: 3306 // Port par défaut pour MariaDB
-}
+const baseURL = 'http://localhost:3000'
 
 async function exportToDatabase () {
-  const url = 'http://localhost:3000/insert'
+  if (!dataJournal || !dataJournal.user || !dataJournal.journal) {
+    console.error('DataJournal manquant ou incomplet')
+    return
+  }
 
   // Fonction pour récupérer l'ID de l'utilisateur depuis le serveur
   async function getUserId (pseudo) {
@@ -1240,31 +1363,45 @@ async function exportToDatabase () {
     }
   }
 
-  // Fonction pour vérifier l'existence d'un utilisateur et récupérer son ID
   async function verifyAndGetUserId (pseudo, role) {
     let userId = await getUserId(pseudo)
 
     if (userId === null) {
-      // L'utilisateur n'existe pas, donc on l'ajoute
-      await postData('utilisateurs', { pseudo: pseudo, role: role })
+      await postData('utilisateurs', { pseudo, role })
       userId = await getUserId(pseudo) // Récupère le nouvel ID
     }
+
     return userId
   }
 
-  // Validation des données de base
-  if (!dataJournal || !dataJournal.user || !dataJournal.journal) {
-    console.error('DataJournal manquant ou incomplet')
-    return
+  async function exportEntries (entries, tableName) {
+    for (const entry of entries) {
+      if (!entry.duration) {
+        console.log(`Entrée ignorée en raison de l'absence de durée:`, entry)
+        continue
+      }
+
+      try {
+        await postData(tableName, {
+          ...entry,
+          journal_id: dataJournal.journal.id
+        })
+      } catch (error) {
+        console.error(
+          `Erreur lors de la publication de l'entrée (${tableName}):`,
+          error
+        )
+      }
+    }
   }
 
-  // Récupération des IDs
-  let auteurId = await verifyAndGetUserId(dataJournal.user.pseudo, 'auteur')
+  const auteurId = await verifyAndGetUserId(dataJournal.user.pseudo, 'auteur')
+  const responsableId = await verifyAndGetUserId(
+    dataJournal.user.boss,
+    'responsable'
+  )
 
-  let responsableId = await verifyAndGetUserId(dataJournal.user.boss,'responsable')
-
-  // Données du journal avec les IDs récupérés
-  let journalData = {
+  const journalData = {
     id: dataJournal.journal.id,
     titre: dataJournal.journal.title,
     auteur_id: auteurId,
@@ -1273,36 +1410,8 @@ async function exportToDatabase () {
 
   await postData('journaux', journalData)
 
-  // Exportation des entrées de journal et de planification
-  for (const entry of dataJournal.journalEntries) {
-    await postData('entrees_journal', {
-      ...entry,
-      journal_id: dataJournal.journal.id
-    })
-  }
-
-  // Exportation des entrées de planification, en ignorant celles sans durée
-  for (const plan of dataJournal.planningEntries) {
-    if (plan.duration === '' || plan.duration == null) {
-      console.log(
-        "Entrée de planification ignorée en raison de l'absence de durée:",
-        plan
-      )
-      continue // Ignore l'entrée actuelle et passe à la suivante
-    }
-
-    try {
-      await postData('planifications', {
-        ...plan,
-        journal_id: dataJournal.journal.id
-      })
-    } catch (error) {
-      console.error(
-        "Erreur lors de la publication de l'entrée de planification:",
-        error
-      )
-    }
-  }
+  await exportEntries(dataJournal.journalEntries, 'entrees_journal')
+  await exportEntries(dataJournal.planningEntries, 'planifications')
 }
 
 function showAlert (message, type) {
@@ -1310,17 +1419,30 @@ function showAlert (message, type) {
   alertPopup.textContent = message
   alertPopup.style.display = 'block'
 
-  // Définir la couleur en fonction du type de message
-  if (type === 'error') {
-    alertPopup.style.backgroundColor = '#f44336' // Rouge pour les erreurs
-  } else if (type === 'success') {
-    alertPopup.style.backgroundColor = '#4CAF50' // Vert pour le succès
-  } else if (type === 'info') {
-    alertPopup.style.backgroundColor = '#FFA500' // Orange pour l'information
+  // Couleurs pour différents types de messages
+  const colors = {
+    error: '#f44336', // Rouge pour les erreurs
+    success: '#4CAF50', // Vert pour le succès
+    info: '#FFA500' // Orange pour l'information
   }
 
-  // Faire disparaître le popup après 3 secondes
-  setTimeout(function () {
-    alertPopup.style.display = 'none'
+  // Appliquer la couleur correspondante ou une couleur par défaut
+  alertPopup.style.backgroundColor = colors[type] || '#DDDDDD' // Gris pour les types non spécifiés
+
+  // Transition douce pour la disparition
+  alertPopup.style.transition = 'opacity 0.5s ease-in-out'
+  alertPopup.style.opacity = '1'
+
+  // Annuler le timeout précédent si nécessaire
+  if (window.alertTimeout) {
+    clearTimeout(window.alertTimeout)
+  }
+
+  // Faire disparaître le popup après 3 secondes avec transition
+  window.alertTimeout = setTimeout(function () {
+    alertPopup.style.opacity = '0'
+    setTimeout(function () {
+      alertPopup.style.display = 'none'
+    }, 500) // Attendre la fin de la transition pour cacher l'élément
   }, 3000)
 }

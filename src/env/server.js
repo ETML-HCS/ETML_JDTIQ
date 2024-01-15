@@ -11,13 +11,15 @@ const db = mysql.createConnection({
   host: 'db',
   user: 'root',
   password: 'exemple',
-  database: 'JournalDB'
-})
+  database: 'JournalDB',
+  charset: 'utf8mb4' // Obligatoire pour la gestion des accents
+});
 
 db.connect(err => {
-  if (err) throw err
-  console.log('Connecté à la base de données')
-})
+  if (err) throw err;
+  console.log('Connecté à la base de données');
+});
+
 
 // Fonction pour insérer des données dans une table spécifiée
 function insererDonnees (table, data) {
