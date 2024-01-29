@@ -471,7 +471,10 @@ function loadJournalByKey (journalId) {
   try {
     const data = localStorage.getItem(journalKey)
     if (data) {
-      console.log(`Journal ${journalId} chargé depuis la clé ${journalKey}.`)
+      showAlert(
+        `Journal ${journalId} chargé depuis la clé ${journalKey}.`,
+        info
+      )
       loadJournalDataToDom(JSON.parse(data))
       return
     } else {
@@ -906,7 +909,6 @@ function creerDivPeriode (jour, periode, precision, onglet) {
   }
 
   periodesDiv.appendChild(creerDivCheckTimes(periodesDiv, periode))
-
   return periodesDiv
 }
 
@@ -963,15 +965,89 @@ function creerDivEntree (jours, periode, ligne, onglet) {
   )
 
   // Bouton de suppression
-  let btnSupprimer = document.createElement('button')
-  btnSupprimer.innerText = 'X'
-  btnSupprimer.className = 'btnSuppression'
-  btnSupprimer.onclick = function () {
-    entreeDiv.remove()
+  let btnDelete = document.createElement('button')
+  btnDelete.innerText = 'X'
+  btnDelete.className = 'btnDelete'
+
+  btnDelete.onclick = function (event) {
+    const [seq, jour, periode, entree] = getInfoDivEntree(event.target)
+    const countEntries = countDivEntree(event.target.parentNode)
+
+    if (countEntries > 1) {
+      entreeDiv.remove()
+      showAlert(
+        `Entrée suivante a été supprimée de ${event.target.parentNode.id}`,
+        'success'
+      )
+    } else {
+      showAlert(
+        `Vous ne pouvez pas supprimer toutes les entrées de cette période.`,
+        'info'
+      )
+    }
   }
-  entreeDiv.appendChild(btnSupprimer)
+
+  entreeDiv.appendChild(btnDelete)
+
+  let btnAdd = document.createElement('button')
+  btnAdd.innerHTML = '&#9660;+' // Utilisez le caractère Unicode de la flèche vers le bas
+  btnAdd.className = 'btnAdd'
+  btnAdd.onclick = function (event) {
+    const parentDiv = event.target.parentNode
+    const idSource = parentDiv.id
+
+    const [seq, jour, periode, entree] = getInfoDivEntree(parentDiv)
+    const countEntries = countDivEntree(parentDiv)
+
+    if (countEntries < dataJournal.journal.config.timePrecision) {
+      const newEntree = creerDivEntree(jour, periode, entree, onglet)
+      parentDiv.insertAdjacentElement('afterend', newEntree)
+      renameIdDivEntree(parentDiv)
+    } else {
+      showAlert(
+        "Vous avez atteint le nombre maximum d'entrées pour cette période.",
+        'info'
+      )
+    }
+  }
+
+  entreeDiv.appendChild(btnAdd)
 
   return entreeDiv
+}
+
+function renameIdDivEntree (parentDiv) {
+  // Sélectionnez toutes les divs entree sous le parentDiv
+  const divsEntree = parentDiv.parentNode.querySelectorAll('.entree')
+
+  // Parcourez chaque div entree
+  divsEntree.forEach((divEntree, index) => {
+    // Obtenez les informations actuelles de l'ID de la div entree
+    const [seq, jour, periode, entree] = getInfoDivEntree(divEntree)
+
+    // Créez le nouvel ID en ajoutant 1 à l'index (en commençant par 0)
+    const newID = `${seq}-${jour}-${periode}-${index}`
+
+    // Mettez à jour l'ID de la div entree
+    divEntree.id = newID
+  })
+}
+
+function getInfoDivEntree (current) {
+  const parentID = current.id
+  const [seq, jour, periode, entree] = parentID.split('-')
+  console.log('Séquence :', seq)
+  console.log('Jour :', jour)
+  console.log('Période :', periode)
+  console.log('Entrée :', entree)
+
+  return [seq, jour, periode, entree]
+}
+
+function countDivEntree (parent) {
+  const nDivsEntree = parent.parentNode.getElementsByClassName('entree').length
+  console.log(nDivsEntree)
+  return nDivsEntree
 }
 
 function getParentElement (onglet) {
@@ -980,7 +1056,7 @@ function getParentElement (onglet) {
   } else if (onglet === onglets.PLANIFICATION) {
     return document.getElementById('parentSequencePlannification')
   }
-  console.log('le paramètre onglet contient une valeur incorrecte')
+  showAlert('le paramètre onglet contient une valeur incorrecte', 'error')
   return null
 }
 
@@ -1314,7 +1390,7 @@ const baseURL = 'http://localhost:3000'
 
 async function exportToDatabase () {
   if (!dataJournal || !dataJournal.user || !dataJournal.journal) {
-    console.error('DataJournal manquant ou incomplet')
+    showAlert('DataJournal manquant ou incomplet', 'error')
     return
   }
 
@@ -1330,9 +1406,9 @@ async function exportToDatabase () {
       const data = await response.json()
       return data.id
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération de l'ID de l'utilisateur:",
-        error
+      showAlert(
+        `Erreur lors de la récupération de l'ID de l'utilisateur: ${error}`,
+        'error'
       )
       return null
     }
@@ -1377,7 +1453,10 @@ async function exportToDatabase () {
   async function exportEntries (entries, tableName) {
     for (const entry of entries) {
       if (!entry.duration) {
-        console.log(`Entrée ignorée en raison de l'absence de durée:`, entry)
+        showAlert(
+          `Entrée ignorée en raison de l'absence de durée:${entry}`,
+          'error'
+        )
         continue
       }
 

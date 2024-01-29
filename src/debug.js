@@ -1,95 +1,126 @@
 // Configurations de dataJournal
-const modeDebug = true // Ce booléen contrôle le chargement du script de débogage
-
-if (modeDebug) {
-  console.log('Mode débug activé')
-  initDebugMode()
-}
-
-function initDebugMode () {
-  creerInterfaceDebug()
-  // Toute autre initialisation nécessaire pour le mode débogage
-}
+// Ce booléen contrôle le chargement du script de débogage
+const modeDebug = true;
 
 // Configurations de journal
 const configurations = {
-  journalStandard: {
-    // 1. **Mock-up pour un Journal Standard**
-    id : "145555_DanielLatour",
-    title: 'Journal de Projet',
-    author: 'Jean Dupont',
-    responsible: 'Marie Curie',
-    firstSeq: "2023-12-28", // Date actuelle
-    journalEntries: [],
-    planningEntries: [],
-    joursSelectionnes: [1],
-    config: {
-      timePrecision: 6,
-      projectType: 'moyen',
-      defaultSequences: 8,
-      baseDuration: 60
+  homerSimpson: {
+    user: {
+      pseudo: 'HomerSimpson',
+      class: 'TestClass',
+      boss: 'Mr. Burns'
     },
-    taskList: [] // Liste des tâches par défaut
+    journal: {
+      id: '111111_HomerSimpson',
+      title: 'Journal de Homer',
+      author: 'Homer Simpson',
+      responsible: 'Marge Simpson',
+      date: ['2024-01-29'],
+      workOfDays: [1],
+      journalEntries: [],
+      planningEntries: [],
+      config: {
+        timePrecision: 6,
+        projectType: 'moyen',
+        defaultSequences: 8,
+        baseDuration: 60,
+        taskList: [],
+        projectDuration: 32,
+        preparatoryWork: 0,
+        journalEntries: [],
+        planningEntries: []
+      }
+    }
   },
-  journalProjetCourt: {
-    // 2. **Mock-up pour un Journal de Projet Court avec Durée de Base Modifiée**
-    id :"214232_DanielLatour",
-    title: 'Planification Rapide',
-    author: 'Paul Martin',
-    responsible: 'Lucas Renaud',
-    firstSeq: "2023-01-01", // Date spécifique
-    journalEntries: [],
-    planningEntries: [],
-    joursSelectionnes: [1, 4],
-    config: {
-      timePrecision: 9,
-      projectType: 'court',
-      // defaultSequences non spécifié, donc prendra la valeur par défaut
-      baseDuration: 45
+  margeSimpson: {
+    user: {
+      pseudo: 'MargeSimpson',
+      class: 'TestClass',
+      boss: 'Homer Simpson'
     },
-    taskList: []
+    journal: {
+      id: '222222_MargeSimpson',
+      title: 'Journal de Marge',
+      author: 'Marge Simpson',
+      responsible: 'Bart Simpson',
+      date: ['2024-02-15'],
+      workOfDays: [2],
+      journalEntries: [],
+      planningEntries: [],
+      config: {
+        timePrecision: 7,
+        projectType: 'court',
+        defaultSequences: 6,
+        baseDuration: 45,
+        taskList: [],
+        projectDuration: 28,
+        preparatoryWork: 1,
+        journalEntries: [],
+        planningEntries: []
+      }
+    }
   },
-  journalTPI: {
-    // 3. **Mock-up pour un Journal de Type TPI avec Précision Temporelle Élevée**
-    id :"0111111_DanielLatour",
-    title: 'TPI Analyse et Développement',
-    author: 'Sophie Leroy',
-    responsible: 'Alex Durand',
-    firstSeq: "2023-06-01",
-    journalEntries: [],
-    planningEntries: [],
-    joursSelectionnes: [4],
-    config: {
-      timePrecision: 12, // Précision temporelle élevée
-      projectType: 'tpi',
-      defaultSequences: 10, // Nombre de séquences personnalisé
-      baseDuration: 60
+  bartSimpson: {
+    user: {
+      pseudo: 'BartSimpson',
+      class: 'TestClass',
+      boss: 'Marge Simpson'
     },
-    taskList: []
+    journal: {
+      id: '333333_BartSimpson',
+      title: 'Journal de Bart',
+      author: 'Bart Simpson',
+      responsible: 'Lisa Simpson',
+      date: ['2024-03-10'],
+      workOfDays: [3],
+      journalEntries: [],
+      planningEntries: [],
+      config: {
+        timePrecision: 8,
+        projectType: 'tpi',
+        defaultSequences: 10,
+        baseDuration: 55,
+        taskList: [],
+        projectDuration: 35,
+        preparatoryWork: 2,
+        journalEntries: [],
+        planningEntries: []
+      }
+    }
   }
+};
+
+
+function getCharacterNames (configs) {
+  return Object.keys(configs)
+}
+
+function initDebugMode () {
+  creerInterfaceDebug();
+  // Toute autre initialisation nécessaire pour le mode débogage
 }
 
 // Fonction pour charger une configuration
 function chargerConfigurationDebug (configName) {
-  console.log('Chargement des dataJournal')
-  const config = configurations[configName]
+  console.log('Chargement des dataJournal');
+  const config = configurations[configName];
   if (config) {
-    dataJournal = config
-    console.log('Configuration chargée :', dataJournal)
+    console.log('Configuration chargée :', config);
     createJournal(
-      dataJournal.title,
-      dataJournal.author,
-      dataJournal.responsible,
-      dataJournal.firstSeq  ,
-      dataJournal.config.timePrecision,
-      dataJournal.config.projectType,
-      dataJournal.config.defaultSequences,
-      dataJournal.config.baseDuration,
-      dataJournal.id,
-      dataJournal.joursSelectionnes
+      config.journal.title,
+      config.user.pseudo,
+      config.user.boss,
+      config.user.class,
+      config.journal.date,
+      config.journal.config.timePrecision,
+      config.journal.config.projectType,
+      config.journal.config.defaultSequences,
+      config.journal.config.baseDuration,
+      config.journal.id,
+      config.journal.workOfDays
     );
   } else {
-    console.error('Configuration non trouvée :', configName)
+    console.error('Configuration non trouvée :', configName);
   }
 }
 
@@ -97,11 +128,15 @@ function creerInterfaceDebug () {
   // Créer le sélecteur
   const select = document.createElement('select')
   select.id = 'testConfigSelector'
-  const options = [
-    { value: 'journalStandard', text: 'Journal Standard' },
-    { value: 'journalProjetCourt', text: 'Projet Court' },
-    { value: 'journalTPI', text: 'TPI' }
-  ]
+
+  const nameConfig = getCharacterNames(configurations)
+
+  // Créez un tableau d'options à partir des noms de configurations
+  const options = nameConfig.map(element => ({
+    value: element,
+    text: configurations[element].journal.config.projectType
+  }))
+
   options.forEach(opt => {
     const option = document.createElement('option')
     option.value = opt.value
@@ -123,7 +158,8 @@ function creerInterfaceDebug () {
   document.body.prepend(button)
 }
 
-// // Dans debug.js
-// window.initDebugMode = function() {
-//   // ... implémentation de la fonction ...
-// };
+// Appelez initDebugMode après la définition de configurations
+if (modeDebug) {
+  console.log('Mode débug activé');
+  initDebugMode();
+}

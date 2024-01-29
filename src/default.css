@@ -441,8 +441,6 @@ h1 {
     padding-bottom: var(--taille-texte-grande); 
 }
 
-
-
 #buttonsPlanification button,
 #buttonsJournal button {
     background-color: var(--couleur-bouton);
@@ -670,9 +668,8 @@ footer p {
     /* Couleur de fond pour périodes impaires */
 }
 
-
-.btnSuppression,
-.btnAjouter {
+.btnDelete,
+.btnAdd {
     padding: 5px 10px;
     margin: 5px;
     border: none;
@@ -683,26 +680,26 @@ footer p {
     font-weight: bolder;
 }
 
-.btnSuppression {
+.btnDelete {
     background-color: #ff5b5b;
     /* rouge */
     color: white;
     /* couleur du texte changée pour noir */
 }
 
-.btnSuppression:hover {
+.btnDelete:hover {
     background-color: #fd0000;
     /* rouge plus foncé au survol */
 }
 
-.btnAjouter {
+.btnAdd {
     background-color: #5ac95e;
     /* vert */
     color: white;
     /* couleur du texte changée pour noir */
 }
 
-.btnAjouter:hover {
+.btnAdd:hover {
     background-color: #45a049;
     /* vert plus foncé au survol */
 }
