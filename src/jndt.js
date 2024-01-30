@@ -15,10 +15,14 @@ Développement d'une application pour la gestion des temps. Cette application of
 */
 
 // Déclaration globale
+let isLocalLoad = false
+
 // sequenceNumber : Ce tableau stocke le nombre de séquences effectives pour deux activités distinctes :
 // [0] représente le nombre de séquences de planification réalisées,
 // [1] indique le nombre d'entrées enregistrées dans le journal de projet.
 let sequenceNumber = [0, 0]
+const seqPlanification = 0
+const seqJournal = 1
 
 // sequenceCalDate : Ce tableau suit le nombre total de séquences pour les mêmes deux activités,
 // mais en incluant les jours non ouvrables comme les vacances et les absences :
@@ -416,6 +420,7 @@ function displayJournalsFromLocalStorage () {
       // Ajouter un écouteur d'événements pour le clic
       journalDiv.addEventListener('click', () => {
         const saveKey = journalDiv.getAttribute('data-save-key')
+        showAlert(`Chargement du journal ${saveKey}`, 'info') // pas de popup, information de debug
         loadJournalByKey(saveKey) // Charger le journal en utilisant la clé de sauvegarde
       })
 
@@ -427,11 +432,11 @@ function displayJournalsFromLocalStorage () {
 
       // Ajouter le titre du journal
       const journalTitle = document.createElement('h3')
-      const titleText = journalData.title
-        ? journalData.title + ' - ' + journalData.responsible
+      const titleText = journalData.journal.title
+        ? journalData.journal.title + ' - ' + journalData.user.boss
         : 'Journal sans titre'
-      const dateString = journalData.firstSeq
-        ? new Date(journalData.firstSeq).toLocaleDateString()
+      const dateString = journalData.journal.date[0]
+        ? new Date(journalData.journal.date[0]).toLocaleDateString()
         : 'pas de date'
       journalTitle.innerHTML = `${titleText}<br>${dateString}`
 
@@ -447,8 +452,9 @@ function displayJournalsFromLocalStorage () {
 
 function saveJournalLocally () {
   if (!dataJournal || !dataJournal.journal.id) {
-    console.warn(
-      'Données du journal ou identifiant manquant pour la sauvegarde locale.'
+    showAlert(
+      'Données du journal ou identifiant manquant pour la sauvegarde locale.',
+      'error'
     )
     return
   }
@@ -462,7 +468,7 @@ function saveJournalLocally () {
       'info'
     )
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde du journal : ', error)
+    showAlert(`Erreur lors de la sauvegarde du journal : ${error}`, 'error')
   }
 }
 
@@ -471,33 +477,35 @@ function loadJournalByKey (journalId) {
   try {
     const data = localStorage.getItem(journalKey)
     if (data) {
-      showAlert(
-        `Journal ${journalId} chargé depuis la clé ${journalKey}.`,
-        info
-      )
+      console.info(`Journal ${journalId} chargé depuis la clé ${journalKey}.`)
       loadJournalDataToDom(JSON.parse(data))
+      isLocalLoad = false;  
       return
     } else {
-      console.warn(`Aucun journal trouvé avec l'identifiant ${journalId}.`)
+      console.info(`Aucun journal trouvé avec l'identifiant ${journalId}.`)
+      
       return null
     }
   } catch (error) {
-    console.error('Erreur lors du chargement du journal : ', error)
+    console.error(`Erreur lors du chargement du journal: ${error}`)
     return null
   }
+
 }
 
 function loadJournalDataToDom (data) {
   if (!data) {
-    console.error('Données de journal non valides')
+    showAlert('Données de journal non valides', 'error')
     return
   }
+
+  isLocalLoad = true
 
   // Fonction pour obtenir le plus grand numéro de séquence
   const getPlusGrandeSequenceNumber = entries =>
     entries.reduce(
       (max, entree) =>
-        Math.max(max, parseInt(entree.entreeId.split('-')[0], 10)),
+        Math.max(max, parseInt(entree.entryId.split('-')[0], 10)),
       0
     )
 
@@ -522,6 +530,10 @@ function loadJournalDataToDom (data) {
       injectToEntries(entries, onglet)
     }
   }
+
+  /*
+    idéalement, le chargement dois se faire depuis les deux objets....
+   */
 
   processEntries(
     dataJournal.planningEntries,
@@ -549,10 +561,10 @@ function injectToEntries (entries, onglet) {
 
   entries.forEach(entry => {
     // Utiliser un sélecteur d'attributs pour contourner la limitation des ID commençant par un chiffre
-    const entryElement = parent.querySelector(`[id="${entry.entreeId}"]`)
+    const entryElement = parent.querySelector(`[id="${entry.entryId}"]`)
     if (!entryElement) {
       console.error(
-        `Élément non trouvé pour l'entreeId ${entry.entreeId} dans l'onglet ${onglet}`
+        `Élément non trouvé pour l'entryId ${entry.entryId} dans l'onglet ${onglet}`
       )
       return
     }
@@ -680,20 +692,10 @@ function ajouterNouvelleSequence (onglet) {
     let jour = frequence[i]
     sequenceDiv.appendChild(creerDivJour(jour, dureeProjet, precision, onglet))
   }
-
-  // // Ajouter un bouton pour ajouter une nouvelle entrée à la fin de la séquence
-  // let btnAjouterEntree = document.createElement('button');
-  // btnAjouterEntree.innerText = 'Ajouter une nouvelle entrée';
-  // btnAjouterEntree.onclick = function() {
-  //   sequenceDiv.appendChild(creerDivEntree());
-  // };
-  // sequenceDiv.appendChild(btnAjouterEntree);
-
   parentElement.prepend(sequenceDiv)
 }
 
 function updateTotalDurationForSequence (onglet) {
-  // Supposons que toutes les périodes d'une séquence soient contenues dans un conteneur de séquence
   const sequenceContainers = document.querySelectorAll(
     '#parentSequencePlannification'
   ) // Remplacez '.sequence-container' par la classe appropriée
@@ -714,14 +716,17 @@ function updateTotalDurationForSequence (onglet) {
     // Mettre à jour le div 'titleSequence' avec le total
     const titleSequenceDiv = sequenceContainer.querySelector('.titleSequence')
     if (titleSequenceDiv) {
-      // Création d'un élément span pour afficher le total
-      const totalSpan = document.createElement('span')
+      let totalSpan = document.querySelector('.totalSpan')
+
+      if (!totalSpan) {
+        totalSpan = document.createElement('span')
+        totalSpan.className = 'totalSpan'
+        totalSpan.style.textAlign = 'center'
+        titleSequenceDiv.appendChild(totalSpan)
+      }
+
       totalSpan.textContent = `Total journal: ${totalDurationForSequence} min`
       totalSpan.style.display = 'block' // Pour centrer le texte
-      totalSpan.style.textAlign = 'center'
-
-      // Insérer le total dans la div 'titleSequence'
-      titleSequenceDiv.appendChild(totalSpan)
     }
   })
 }
@@ -824,7 +829,6 @@ function addEntriesHeader () {
 }
 
 // fonctions pour ajouter une nouvelle séquence
-
 function creerDivSequence (onglet) {
   // Obtenir la prochaine date de la séquence et vérifier les jours fériés/vacances
   let sequenceDiv = document.createElement('div')
@@ -904,12 +908,56 @@ function creerDivPeriode (jour, periode, precision, onglet) {
   let periodesDiv = document.createElement('div')
   periodesDiv.className = 'periode_' + periode
 
-  for (let e = 0; e < precision; e++) {
-    periodesDiv.appendChild(creerDivEntree(jour, periode, e, onglet))
+  if (isLocalLoad) {
+    // la fonction efface à la mauvaise séquence
+    // entryId = séquence-jour-periode-entrée
+    const rows = getRowsForThis(jour, periode, onglet)
+    for (let e = 0; e < rows; e++) {
+      periodesDiv.appendChild(creerDivEntree(jour, periode, e, onglet))
+    }
+  } else {
+    for (let e = 0; e < precision; e++) {
+      periodesDiv.appendChild(creerDivEntree(jour, periode, e, onglet))
+    }
   }
 
   periodesDiv.appendChild(creerDivCheckTimes(periodesDiv, periode))
   return periodesDiv
+}
+
+function getRowsForThis (jour, periode, onglet) {
+  // Créer le motif de recherche sous forme de chaîne de caractères
+  let correspondances
+  let motifRecherche
+
+  switch (onglet) {
+    case onglets.PLANIFICATION:
+      motifRecherche = `${sequenceNumber[1]}-${jour}-${periode}-\\d+`
+
+      // Compter le nombre d'éléments correspondant au motif
+      correspondances = dataJournal.planningEntries.filter(entry => {
+        return entry.entryId.match(new RegExp(motifRecherche, 'g'))
+      })
+      break
+
+    case onglets.JOURNAL:
+      motifRecherche = `${sequenceNumber[0]}-${jour}-${periode}-\\d+`
+
+      // Compter le nombre d'éléments correspondant au motif
+      correspondances = dataJournal.journalEntries.filter(entry => {
+        return entry.entryId.match(new RegExp(motifRecherche, 'g'))
+      })
+      break
+
+    default:
+      break
+  }
+
+  // Le nombre d'éléments correspondant au motif est la longueur du tableau de correspondances
+  const compteur = correspondances ? correspondances.length : 0
+
+  console.log('occurrence pour la période', periode, ':', compteur)
+  return compteur
 }
 
 function creerDivEntree (jours, periode, ligne, onglet) {
@@ -990,7 +1038,7 @@ function creerDivEntree (jours, periode, ligne, onglet) {
   entreeDiv.appendChild(btnDelete)
 
   let btnAdd = document.createElement('button')
-  btnAdd.innerHTML = '&#9660;+' // Utilisez le caractère Unicode de la flèche vers le bas
+  btnAdd.innerHTML = '&#9660;' // Utilisez le caractère Unicode de la flèche vers le bas
   btnAdd.className = 'btnAdd'
   btnAdd.onclick = function (event) {
     const parentDiv = event.target.parentNode
@@ -1064,8 +1112,14 @@ function getNextDate (firstDate, onglet) {
   // Réinitialiser VResult
   VResult.date = null
   VResult.divSpecial = null
+  let nextDate = null
 
-  let nextDate = new Date(firstDate)
+  if (Array.isArray(firstDate)) {
+    nextDate = new Date(firstDate[0])
+  } else {
+    nextDate = new Date(firstDate)
+  }
+
   nextDate.setDate(
     nextDate.getDate() + 7 * sequenceCalDate[onglets.JOURNAL == onglet ? 0 : 1]
   )
@@ -1085,7 +1139,6 @@ function getNextDate (firstDate, onglet) {
       nextDate.setDate(nextDate.getDate() + 1)
     }
   }
-
   VResult.date = nextDate
 
   return nextDate
@@ -1167,43 +1220,50 @@ function saveEntries (onglet) {
 
 function saveEntriesForContainer (containerId, targetArray) {
   const container = document.getElementById(containerId)
+
   if (!container) {
     showAlert(`Le conteneur ${containerId} n'existe pas.`, 'error')
     return
   }
 
-  const entreeDivs = container.querySelectorAll('.entree')
+  const entryDivs = container.querySelectorAll('.entree')
   const entries = []
 
-  entreeDivs.forEach(div => {
-    const entreeId = div.id // Utilisation de l'ID de la div d'entrée
-    const task = div.querySelector('.select-task').value
-    const duration = div.querySelector('.input-duration').value
-    const description = div.querySelector('.input-description').value
-    const reference = div.querySelector('.input-ref').value
-    const status = div.querySelector('.select-status').value
-    const tag = div.querySelector('.input-tag').value
+  function validateEntry (entry) {
+    return (
+      entry.task === 'Absences/Maladie' ||
+      entry.description.trim() !== '' ||
+      entry.reference.trim() !== ''
+    )
+  }
 
-    // Ajouter l'entrée si la tâche n'est pas "Absences/Maladie" ou si les champs description et reference sont remplis
-    if (
-      task !== 'Absences/Maladie' ||
-      description.trim() !== '' ||
-      reference.trim() !== ''
-    ) {
-      entries.push({
-        entreeId,
-        duration,
-        task,
-        description,
-        reference,
-        status,
-        tag
-      })
+  entryDivs.forEach(entryDiv => {
+    const entryId = entryDiv.id
+    const task = entryDiv.querySelector('.select-task').value
+    const duration = entryDiv.querySelector('.input-duration').value
+    const description = entryDiv.querySelector('.input-description').value
+    const reference = entryDiv.querySelector('.input-ref').value
+    const status = entryDiv.querySelector('.select-status').value
+    const tag = entryDiv.querySelector('.input-tag').value
+
+    const entry = {
+      entryId,
+      duration,
+      task,
+      description,
+      reference,
+      status,
+      tag
+    }
+
+    if (validateEntry(entry)) {
+      entries.push(entry)
     }
   })
 
-  // Copie les entrées dans le tableau cible
-  targetArray.push(...entries)
+  // Mettre à jour le tableau cible avec les nouvelles entrées
+  targetArray.length = 0 // Efface le tableau actuel
+  targetArray.push(...entries) // Ajoute les nouvelles entrées
 }
 
 function updateDOMWithEntries (tabType) {

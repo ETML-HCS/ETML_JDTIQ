@@ -1,6 +1,6 @@
 // Configurations de dataJournal
 // Ce booléen contrôle le chargement du script de débogage
-const modeDebug = true;
+const modeDebug = true
 
 // Configurations de journal
 const configurations = {
@@ -87,25 +87,365 @@ const configurations = {
         planningEntries: []
       }
     }
+  },
+  withData: {
+    user: {
+      pseudo: 'Daniel',
+      class: 'CIN1b',
+      boss: 'HCS'
+    },
+    journal: {
+      id: '936864_Daniel',
+      title: 'hardware',
+      date: [
+        '2024-01-29',
+        '2024-01-29',
+        '2024-02-05'
+      ],
+      workOfDays: [1, 4],
+      config: {
+        timePrecision: 3,
+        projectType: 'long',
+        defaultSequences: 8,
+        baseDuration: 45,
+        taskList: [
+          {
+            id: 'analyse',
+            name: 'Analyse',
+            category: 'Initiation',
+            description:
+              'Comprendre les exigences à partir du cahier des charges.'
+          },
+          {
+            id: 'planification',
+            name: 'Planification',
+            category: 'Planification',
+            description: 'Préparer les tâches et ressources nécessaires.'
+          },
+          {
+            id: 'execution',
+            name: 'Exécution',
+            category: 'Exécution',
+            description: 'Réaliser les activités du projet.'
+          },
+          {
+            id: 'suivi',
+            name: 'Suivi',
+            category: 'Contrôle',
+            description: 'Suivre l’avancement et résoudre les problèmes.'
+          },
+          {
+            id: 'qualite',
+            name: 'Qualité',
+            category: 'Contrôle',
+            description: 'Contrôler la qualité des livrables.'
+          },
+          {
+            id: 'rapport',
+            name: 'Rapport',
+            category: 'Clôture',
+            description: 'Documenter les activités et résultats.'
+          },
+          {
+            id: 'retour',
+            name: 'Retour',
+            category: 'Clôture',
+            description: 'Analyser les succès et difficultés.'
+          },
+          {
+            id: 'preparation-tpi',
+            name: 'Préparation TPI',
+            category: 'Travail avant TPI',
+            description: 'Préparer et planifier le travail avant le TPI.'
+          },
+          {
+            id: 'recherche-tpi',
+            name: 'Recherche pour TPI',
+            category: 'Travail avant TPI',
+            description:
+              'Recherche de ressources et de connaissances nécessaires pour le TPI.'
+          },
+          {
+            id: 'ferie',
+            name: 'Férié/Congé',
+            category: 'RH',
+            description: 'Gestion des jours fériés.'
+          },
+          {
+            id: 'absence',
+            name: 'Absence/Maladie',
+            category: 'RH',
+            description: 'Gérer les maladies et absences.'
+          }
+        ],
+        projectDuration: 40,
+        preparatoryWork: 0
+      }
+    },
+    journalEntries: [],
+    planningEntries: [
+      {
+        entryId: '1-1-0-1',
+        duration: '45',
+        task: 'Exécution',
+        description: 'Test de la solution ',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-1-0',
+        duration: '35',
+        task: 'Analyse',
+        description: 'lecture du cahier des charges ',
+        reference: '',
+        status: 'Terminé',
+        tag: ''
+      },
+      {
+        entryId: '1-1-1-2',
+        duration: '10',
+        task: 'Analyse',
+        description: 'Recherche du périmètre ',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-2-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-2-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-2-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-3-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-3-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-3-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-4-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-4-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-1-4-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-0-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-0-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-0-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-1-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-1-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-1-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-2-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-2-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-2-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-3-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-3-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-3-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-4-0',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-4-1',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      },
+      {
+        entryId: '1-4-4-2',
+        duration: '',
+        task: 'Analyse',
+        description: '',
+        reference: '',
+        status: 'En cours',
+        tag: ''
+      }
+    ]
   }
-};
-
+}
 
 function getCharacterNames (configs) {
   return Object.keys(configs)
 }
 
 function initDebugMode () {
-  creerInterfaceDebug();
+  creerInterfaceDebug()
   // Toute autre initialisation nécessaire pour le mode débogage
 }
 
 // Fonction pour charger une configuration
 function chargerConfigurationDebug (configName) {
-  console.log('Chargement des dataJournal');
-  const config = configurations[configName];
+  console.log('Chargement des dataJournal')
+  const config = configurations[configName]
   if (config) {
-    console.log('Configuration chargée :', config);
+    console.log('Configuration chargée :', config)
     createJournal(
       config.journal.title,
       config.user.pseudo,
@@ -118,9 +458,9 @@ function chargerConfigurationDebug (configName) {
       config.journal.config.baseDuration,
       config.journal.id,
       config.journal.workOfDays
-    );
+    )
   } else {
-    console.error('Configuration non trouvée :', configName);
+    console.error('Configuration non trouvée :', configName)
   }
 }
 
@@ -160,6 +500,6 @@ function creerInterfaceDebug () {
 
 // Appelez initDebugMode après la définition de configurations
 if (modeDebug) {
-  console.log('Mode débug activé');
-  initDebugMode();
+  console.log('Mode débug activé')
+  initDebugMode()
 }
